@@ -1,33 +1,65 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:notepad/main.dart';
 
 class AddNote extends StatefulWidget {
+  final Storage storage;
+
+  AddNote({@required this.storage});
+
   @override
   _AddNoteState createState() => _AddNoteState();
 }
 
 class _AddNoteState extends State<AddNote> {
   List<bool> iconState = [false, false, false, false];
+  TextEditingController controller = TextEditingController();
+  String state;
+  Future<Directory> _appDocDir;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.storage.readData().then((String value) {
+      setState(() {
+        state = value;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  Future<File> writeData() async {
+    setState(() {
+      state = controller.text;
+      controller.text = '';
+    });
+    return widget.storage.writeData(state);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[900],
       appBar: AppBar(
-        backgroundColor: Colors.grey[900],
         leading: IconButton(
           icon: Icon(
             Icons.close,
-            color: Colors.grey[500],
           ),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
         actions: <Widget>[
+          IconButton(icon: Icon(Icons.info), onPressed: null),
           IconButton(
-              icon: Icon(Icons.info, color: Colors.grey[500]), onPressed: null),
-          IconButton(
-              icon: Icon(Icons.check_circle, color: Colors.redAccent),
+              icon: Icon(Icons.check_circle),
               onPressed: () {
+                writeData();
                 Navigator.pop(context);
               }),
         ],
@@ -40,45 +72,27 @@ class _AddNoteState extends State<AddNote> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
+                  controller: controller,
                   maxLength: 25,
-                  style: TextStyle(
-                    fontFamily: 'SpaceMono',
-                    color: Colors.grey[500],
-                    fontSize: 25,
-                  ),
+                  style: TextStyle(fontSize: 25),
                   decoration: InputDecoration(
                     border: InputBorder.none,
-                    counterStyle: TextStyle(
-                      fontFamily: 'SpaceMono',
-                      color: Colors.grey[500],
-                      fontSize: 10,
-                    ),
+                    counterStyle: TextStyle(fontSize: 5),
                     hintText: 'Title',
-                    hintStyle: TextStyle(
-                      fontFamily: 'SpaceMono',
-                      color: Colors.grey[500],
-                      fontSize: 25,
-                    ),
+                    hintStyle: TextStyle(fontSize: 25),
                   ),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
+                  //controller: controller,
                   maxLines: 20,
-                  style: TextStyle(
-                    fontFamily: 'SpaceMono',
-                    color: Colors.grey[700],
-                    fontSize: 20,
-                  ),
+                  style: TextStyle(fontSize: 20),
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: 'Add a Note',
-                    hintStyle: TextStyle(
-                      fontFamily: 'SpaceMono',
-                      color: Colors.grey[700],
-                      fontSize: 20,
-                    ),
+                    hintStyle: TextStyle(fontSize: 20),
                   ),
                 ),
               )
@@ -91,7 +105,6 @@ class _AddNoteState extends State<AddNote> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
                   child: Divider(
-                    color: Colors.grey[500],
                     thickness: 1,
                   ),
                 ),
