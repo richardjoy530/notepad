@@ -4,7 +4,6 @@ import 'package:notepad/addnote.dart';
 import 'dart:io';
 import 'dart:async';
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter/foundation.dart';
 
 void main() => runApp(MyApp());
 
@@ -12,18 +11,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        theme: ThemeData(fontFamily: 'SpaceMono'),
-        home: MyTabbedHome(
-          storage: Storage(),
-        ));
+        theme: ThemeData(fontFamily: 'SpaceMono'), home: MyTabbedHome());
   }
 }
 
 class MyTabbedHome extends StatefulWidget {
-  final Storage storage;
-
-  MyTabbedHome({@required this.storage});
-
   @override
   _MyTabbedHomeState createState() => _MyTabbedHomeState();
 }
@@ -32,17 +24,7 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
     with SingleTickerProviderStateMixin {
   TabController _tabController;
   TextEditingController controller = TextEditingController();
-  String state;
-  Future<Directory> _appDocDir;
-  List<ListTile> noteItems = <ListTile>[
-    ListTile(leading: Icon(Icons.fiber_manual_record), title: Text('Note 1')),
-    ListTile(leading: Icon(Icons.fiber_manual_record), title: Text('Note 2')),
-    ListTile(leading: Icon(Icons.fiber_manual_record), title: Text('Note 3')),
-    ListTile(leading: Icon(Icons.fiber_manual_record), title: Text('Note 4')),
-    ListTile(leading: Icon(Icons.fiber_manual_record), title: Text('Note 5')),
-    ListTile(leading: Icon(Icons.fiber_manual_record), title: Text('Note 6')),
-    ListTile(leading: Icon(Icons.fiber_manual_record), title: Text('Note 7'))
-  ];
+  List<Note> _notes;
   List<Tab> myTabs = <Tab>[
     Tab(icon: Icon(Icons.category)),
     Tab(icon: Icon(Icons.note)),
@@ -57,11 +39,6 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
     super.initState();
     _tabController = TabController(vsync: this, length: myTabs.length);
     _tabController.addListener(_handleTabSelection);
-    widget.storage.readData().then((String value) {
-      setState(() {
-        state = value;
-      });
-    });
   }
 
   @override
@@ -162,9 +139,17 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
       body: TabBarView(controller: _tabController, children: <Widget>[
         Tab(icon: Icon(Icons.home)),
         Tab(
-          child: Column(
-            children: noteItems,
-          ),
+          child: ListView.builder(itemBuilder: (context, index) {
+            return Center(
+              child: Card(
+                child: ListTile(
+                  leading: Icon(Icons.album),
+                  title: Text(_notes[index].title),
+                  subtitle: Text(_notes[index].text),
+                ),
+              ),
+            );
+          }),
         ),
         Tab(icon: Icon(Icons.star)),
       ]),
@@ -182,10 +167,7 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) => AddNote(
-                              storage: Storage(),
-                            )),
+                    MaterialPageRoute(builder: (context) => AddNote()),
                   );
                 },
                 label: Text('Note'),
@@ -199,44 +181,189 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
 }
 
 class Storage {
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-
-    return directory.path;
+  Future<String> get localPath async {
+    final dir = await getApplicationDocumentsDirectory();
+    return dir.path;
   }
 
-  Future<File> get _localFile async {
-    final path = await _localPath;
-    return File('$path/counter.txt');
+  Future<File> get localFile async {
+    final path = await localPath;
+    return File('$path/db.txt');
   }
 
   Future<String> readData() async {
     try {
-      final file = await _localFile;
-
-      // Read the file.
+      final file = await localFile;
       String body = await file.readAsString();
 
       return body;
     } catch (e) {
-      // If encountering an error, return 0.
       return e.toString();
     }
   }
 
   Future<File> writeData(String data) async {
-    final file = await _localFile;
-    // Write the file.
+    final file = await localFile;
     return file.writeAsString("$data");
   }
 }
 
-class NoteItem {
-  String title;
-  String body;
+class Note {
+  final String title;
+  final String text;
 
-  NoteItem(String title, String body) {
-    this.title = title;
-    this.body = body;
+  Note(this.title, this.text);
+
+  Note.fromJson(Map<String, dynamic> json)
+      : title = json['title'],
+        text = json['text'];
+
+  Map<String, dynamic> toJson() => {
+        'title': title,
+        'text': text,
+      };
+}
+
+class AddNote extends StatefulWidget {
+  @override
+  _AddNoteState createState() => _AddNoteState();
+}
+
+class _AddNoteState extends State<AddNote> {
+  List<bool> iconState = [false, false, false, false];
+  TextEditingController controller = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(
+            Icons.close,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        actions: <Widget>[
+          IconButton(icon: Icon(Icons.info), onPressed: null),
+          IconButton(
+              icon: Icon(Icons.check_circle),
+              onPressed: () {
+                Navigator.pop(context);
+              }),
+        ],
+      ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Column(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  controller: controller,
+                  maxLength: 25,
+                  style: TextStyle(fontSize: 25),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    counterStyle: TextStyle(fontSize: 5),
+                    hintText: 'Title',
+                    hintStyle: TextStyle(fontSize: 25),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  //controller: controller,
+                  maxLines: 20,
+                  style: TextStyle(fontSize: 20),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: 'Add a Note',
+                    hintStyle: TextStyle(fontSize: 20),
+                  ),
+                ),
+              )
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
+                  child: Divider(
+                    thickness: 1,
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    IconButton(
+                      icon: Icon(Icons.notifications_active,
+                          color: iconState[0] == false
+                              ? Colors.grey[500]
+                              : Colors.redAccent),
+                      onPressed: () {
+                        setState(() {
+                          iconState[0] = !iconState[0];
+                        });
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.star,
+                          color: iconState[1] == false
+                              ? Colors.grey[500]
+                              : Colors.yellowAccent),
+                      onPressed: () {
+                        setState(() {
+                          iconState[1] = !iconState[1];
+                        });
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.category,
+                          color: iconState[2] == false
+                              ? Colors.grey[500]
+                              : Colors.blueAccent),
+                      onPressed: () {
+                        setState(() {
+                          iconState[2] = !iconState[2];
+                        });
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.list,
+                          color: iconState[3] == false
+                              ? Colors.grey[500]
+                              : Colors.greenAccent),
+                      onPressed: () {
+                        setState(() {
+                          iconState[3] = !iconState[3];
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
   }
 }
+
