@@ -1,9 +1,8 @@
 import 'package:flutter/cupertino.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:flutter/material.dart';
-import 'package:notepad/addnote.dart';
-import 'dart:io';
+import 'package:notepad/helper.dart';
 import 'dart:async';
-import 'package:path_provider/path_provider.dart';
 
 void main() => runApp(MyApp());
 
@@ -11,7 +10,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        theme: ThemeData(fontFamily: 'SpaceMono'), home: MyTabbedHome());
+        theme: ThemeData(
+          fontFamily: 'SpaceMono',
+        ),
+        home: MyTabbedHome());
   }
 }
 
@@ -22,14 +24,16 @@ class MyTabbedHome extends StatefulWidget {
 
 class _MyTabbedHomeState extends State<MyTabbedHome>
     with SingleTickerProviderStateMixin {
+  DatabaseHelper databaseHelper = DatabaseHelper();
   TabController _tabController;
   TextEditingController controller = TextEditingController();
-  List<Note> _notes;
+  List<Note> notes = [];
   List<Tab> myTabs = <Tab>[
     Tab(icon: Icon(Icons.category)),
-    Tab(icon: Icon(Icons.note)),
+    Tab(icon: Icon(Icons.home)),
     Tab(icon: Icon(Icons.star_half))
   ];
+
   void _handleTabSelection() {
     setState(() {});
   }
@@ -37,6 +41,7 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
   @override
   void initState() {
     super.initState();
+    updateListView();
     _tabController = TabController(vsync: this, length: myTabs.length);
     _tabController.addListener(_handleTabSelection);
   }
@@ -48,7 +53,40 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
     super.dispose();
   }
 
-  void _onMenuPressed() {
+  void updateListView() {
+    print("Updating");
+    final Future<Database> dbFuture = databaseHelper.initializeDatabase();
+    dbFuture.then((database) {
+      Future<List<Note>> noteListFuture = databaseHelper.getNoteList();
+      noteListFuture.then((noteList) {
+        setState(() {
+          this.notes = noteList;
+        });
+        print([
+          "in updatelistview id of 5th index = ",
+          notes[5].id,
+          notes[5]._id
+        ]);
+      });
+    });
+  } //
+
+  void navigateToDetail(BuildContext context, Note note, String title) async {
+    bool result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          return AddNote(note, title);
+        },
+      ),
+    );
+
+    if (result == true) {
+      updateListView();
+    }
+  }
+
+  void _onMenuPressed(BuildContext context) {
     showModalBottomSheet(
         context: context,
         shape: RoundedRectangleBorder(
@@ -113,6 +151,9 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
 
   @override
   Widget build(BuildContext context) {
+    if (notes == null) {
+      notes = List<Note>();
+    }
     return Scaffold(
       appBar: AppBar(
           title: Text(
@@ -126,7 +167,7 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
               onPressed: () {
                 setState(() {
                   print('pressed');
-                  _onMenuPressed();
+                  _onMenuPressed(context);
                 });
               }),
           actions: <Widget>[
@@ -139,17 +180,31 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
       body: TabBarView(controller: _tabController, children: <Widget>[
         Tab(icon: Icon(Icons.home)),
         Tab(
-          child: ListView.builder(itemBuilder: (context, index) {
-            return Center(
-              child: Card(
-                child: ListTile(
-                  leading: Icon(Icons.album),
-                  title: Text(_notes[index].title),
-                  subtitle: Text(_notes[index].text),
+          child: notes.length == 0
+              ? IconButton(
+                  icon: Icon(Icons.note_add),
+                  onPressed: () {
+                    navigateToDetail(context, Note('', ''), 'Add Note');
+                  },
+                )
+              : ListView.builder(
+                  itemBuilder: (context, index) {
+                    return Center(
+                      child: Card(
+                        child: ListTile(
+                          onTap: () {
+                            navigateToDetail(
+                                context, notes[index], 'Edit Note');
+                          },
+                          //leading: Icon(Icons.album),
+                          title: Text(notes[index].title),
+                          subtitle: Text(notes[index].text),
+                        ),
+                      ),
+                    );
+                  },
+                  itemCount: notes.length,
                 ),
-              ),
-            );
-          }),
         ),
         Tab(icon: Icon(Icons.star)),
       ]),
@@ -165,10 +220,7 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
                 icon: Icon(Icons.add)),
             FloatingActionButton.extended(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => AddNote()),
-                  );
+                  navigateToDetail(context, Note('', ''), 'Add Note');
                 },
                 label: Text('Note'),
                 icon: Icon(Icons.add))
@@ -180,80 +232,66 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
   }
 }
 
-class Storage {
-  Future<String> get localPath async {
-    final dir = await getApplicationDocumentsDirectory();
-    return dir.path;
-  }
-
-  Future<File> get localFile async {
-    final path = await localPath;
-    return File('$path/db.txt');
-  }
-
-  Future<String> readData() async {
-    try {
-      final file = await localFile;
-      String body = await file.readAsString();
-
-      return body;
-    } catch (e) {
-      return e.toString();
-    }
-  }
-
-  Future<File> writeData(String data) async {
-    final file = await localFile;
-    return file.writeAsString("$data");
-  }
-}
-
-class Note {
-  final String title;
-  final String text;
-
-  Note(this.title, this.text);
-
-  Note.fromJson(Map<String, dynamic> json)
-      : title = json['title'],
-        text = json['text'];
-
-  Map<String, dynamic> toJson() => {
-        'title': title,
-        'text': text,
-      };
-}
-
 class AddNote extends StatefulWidget {
+  final String appBarTitle;
+  final Note note;
+
+  AddNote(this.note, this.appBarTitle);
   @override
-  _AddNoteState createState() => _AddNoteState();
+  AddNoteState createState() => AddNoteState(appBarTitle, note);
 }
 
-class _AddNoteState extends State<AddNote> {
-  List<bool> iconState = [false, false, false, false];
-  TextEditingController controller = TextEditingController();
+class AddNoteState extends State<AddNote> {
+  DatabaseHelper helper = DatabaseHelper();
+  String appBarTitle;
+  Note note;
+  AddNoteState(this.appBarTitle, this.note);
 
-  @override
-  void initState() {
-    super.initState();
-  }
+  List<bool> iconState = [false, false, false, false];
+  TextEditingController titleController = TextEditingController();
+  TextEditingController textController = TextEditingController();
 
   @override
   void dispose() {
-    controller.dispose();
+    titleController.dispose();
+    textController.dispose();
     super.dispose();
+  }
+
+  void _save(BuildContext context) async {
+    Navigator.pop(context, true);
+    if (note.id != null) {
+      print(["calling updatenote "]);
+      await helper.updateNote(note);
+    } else {
+      print(["calling insert "]);
+      await helper.insertNote(note);
+    }
+  }
+
+  void _delete(BuildContext context) async {
+    print(['In _delete() ', note.id, note.title]);
+    await helper.deleteNote(note.id);
+    Navigator.pop(context, true);
+    if (note.id == null) {
+      return;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    print(["In build AddNote title = ", note.title, note.id]);
+    titleController.text = note.title;
+    textController.text = note.text;
     return Scaffold(
       appBar: AppBar(
+        title: Text(appBarTitle),
         leading: IconButton(
           icon: Icon(
             Icons.close,
           ),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pop(context, true);
           },
         ),
         actions: <Widget>[
@@ -261,7 +299,9 @@ class _AddNoteState extends State<AddNote> {
           IconButton(
               icon: Icon(Icons.check_circle),
               onPressed: () {
-                Navigator.pop(context);
+                note.title = titleController.text;
+                note.text = textController.text;
+                _save(context);
               }),
         ],
       ),
@@ -273,9 +313,12 @@ class _AddNoteState extends State<AddNote> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
-                  controller: controller,
+                  controller: titleController,
                   maxLength: 25,
                   style: TextStyle(fontSize: 25),
+                  onChanged: (value) {
+                    note.title = titleController.text;
+                  },
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     counterStyle: TextStyle(fontSize: 5),
@@ -287,9 +330,12 @@ class _AddNoteState extends State<AddNote> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
-                  //controller: controller,
+                  controller: textController,
                   maxLines: 20,
                   style: TextStyle(fontSize: 20),
+                  onChanged: (value) {
+                    note.title = titleController.text;
+                  },
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: 'Add a Note',
@@ -356,6 +402,16 @@ class _AddNoteState extends State<AddNote> {
                         });
                       },
                     ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.delete,
+                        color: Colors.red,
+                      ),
+                      onPressed: () {
+                        print("pressed delete");
+                        _delete(context);
+                      },
+                    ),
                   ],
                 ),
               ],
@@ -364,5 +420,52 @@ class _AddNoteState extends State<AddNote> {
         ],
       ),
     );
+  }
+}
+
+class Note {
+  int _id;
+  String _title;
+  String _text;
+
+  Note(this._title, this._text);
+  Note.withId(this._id, this._title, this._text);
+
+  int get id => _id;
+  String get title => _title;
+  String get text => _text;
+
+  set title(String newTitle) {
+    if (newTitle.length <= 255) {
+      this._title = newTitle;
+    }
+  }
+
+  set text(String newDescription) {
+    if (newDescription.length <= 255) {
+      this._text = newDescription;
+    }
+  }
+
+  // Convert a Note object into a Map object
+  Map<String, dynamic> toMap() {
+    var map = Map<String, dynamic>();
+    print(["in toMap id = ", id, ' _id = ', _id]);
+    if (id != null) {
+      map['id'] = _id;
+    }
+    map['title'] = _title;
+    map['text'] = _text;
+
+    return map;
+  }
+
+  // Extract a Note object from a Map object
+  Note.fromMapObject(Map<String, dynamic> map) {
+    print(["in fromMap map['id'] = ", map['id']]);
+
+    this._id = map['id'];
+    this._title = map['title'];
+    this._text = map['text'];
   }
 }
