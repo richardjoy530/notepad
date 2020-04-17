@@ -57,6 +57,7 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
     print("Updating");
     final Future<Database> dbFuture = databaseHelper.initializeDatabase();
     dbFuture.then((database) {
+
       Future<List<Note>> noteListFuture = databaseHelper.getNoteList();
       noteListFuture.then((noteList) {
         setState(() {
