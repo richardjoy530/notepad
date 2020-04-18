@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:notepad/helper.dart';
 import 'dart:async';
 
+Color titleColor = Colors.white;
+Color textColor = Colors.grey[500];
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -11,6 +14,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
         theme: ThemeData(
+          primaryColor: Colors.grey[900],
+          accentColor: Colors.redAccent,
+          //iconTheme: IconThemeData(color: Colors.redAccent),
+          primaryIconTheme: IconThemeData(color: Colors.grey[500]),
+          canvasColor: Colors.grey[900],
+          textTheme: TextTheme(title: TextStyle(color: Colors.white)),
+          cardTheme: CardTheme(color: Colors.grey[800]),
           fontFamily: 'SpaceMono',
         ),
         home: MyTabbedHome());
@@ -28,6 +38,16 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
   TabController _tabController;
   TextEditingController controller = TextEditingController();
   List<Note> notes = [];
+  List<Note> starredNotes = [];
+  List<String> menu = [
+    'Settings',
+    'Switch Theme',
+    'Change Accent Color',
+    'Help Translate',
+    'Support Development',
+    'Rate and Review',
+    'About'
+  ];
   List<Tab> myTabs = <Tab>[
     Tab(icon: Icon(Icons.category)),
     Tab(icon: Icon(Icons.home)),
@@ -57,17 +77,15 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
     print("Updating");
     final Future<Database> dbFuture = databaseHelper.initializeDatabase();
     dbFuture.then((database) {
-
       Future<List<Note>> noteListFuture = databaseHelper.getNoteList();
       noteListFuture.then((noteList) {
         setState(() {
           this.notes = noteList;
+          starredNotes = [];
+          for (var i = 0; i < notes.length; i++) {
+            notes[i].starred == 1 ? starredNotes.add(notes[i]) : print(" ");
+          }
         });
-        print([
-          "in updatelistview id of 5th index = ",
-          notes[5].id,
-          notes[5]._id
-        ]);
       });
     });
   } //
@@ -81,7 +99,7 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
         },
       ),
     );
-
+    updateListView();
     if (result == true) {
       updateListView();
     }
@@ -89,62 +107,80 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
 
   void _onMenuPressed(BuildContext context) {
     showModalBottomSheet(
+        isScrollControlled: true,
         context: context,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
               topLeft: Radius.circular(10.0), topRight: Radius.circular(10.0)),
         ),
         builder: (context) {
-          return Column(
+          return Wrap(
             children: <Widget>[
               Padding(
-                  padding: const EdgeInsets.fromLTRB(150.0, 10, 150, 10),
-                  child: Divider(thickness: 2)),
+                  padding: const EdgeInsets.fromLTRB(200.0, 10, 200, 10),
+                  child: Divider(thickness: 2, color: Colors.grey[500])),
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                 child: Container(
                   decoration: BoxDecoration(
+                      color: Colors.grey[700],
                       borderRadius: BorderRadius.all(Radius.circular(50))),
                   child: ListTile(
                       leading: CircleAvatar(
                           backgroundImage: AssetImage('images/avatar.png')),
-                      title: Text('Hello,'),
-                      subtitle: Text('Richard')),
+                      title:
+                          Text('Hello,', style: TextStyle(color: Colors.white)),
+                      subtitle: Text('Richard',
+                          style: TextStyle(color: Colors.grey[500]))),
                 ),
               ),
-              Expanded(
-                child: ListTile(
-                    leading: Icon(Icons.settings), title: Text('Settings')),
-              ),
-              Expanded(
-                child: ListTile(
-                    leading: Icon(Icons.color_lens),
-                    title: Text('Switch Theme')),
-              ),
-              Expanded(
-                child: ListTile(
-                    leading: Icon(Icons.colorize),
-                    title: Text('Change Accent Color')),
-              ),
-              Expanded(
-                child: ListTile(
-                    leading: Icon(Icons.g_translate),
-                    title: Text('Help Translate')),
-              ),
-              Expanded(
-                child: ListTile(
-                    leading: Icon(Icons.supervisor_account),
-                    title: Text('Support Development')),
-              ),
-              Expanded(
-                child: ListTile(
-                    leading: Icon(Icons.rate_review),
-                    title: Text('Rate and Review')),
-              ),
-              Expanded(
-                child: ListTile(
-                    leading: Icon(Icons.info_outline), title: Text('About')),
-              ),
+              ListTile(
+                  leading: Icon(
+                    Icons.settings,
+                    color: Colors.grey[500],
+                  ),
+                  title: Text('Settings', style: TextStyle(color: titleColor))),
+              ListTile(
+                  leading: Icon(
+                    Icons.color_lens,
+                    color: Colors.grey[500],
+                  ),
+                  title: Text('Switch Theme',
+                      style: TextStyle(color: titleColor))),
+              ListTile(
+                  leading: Icon(
+                    Icons.colorize,
+                    color: Colors.grey[500],
+                  ),
+                  title: Text('Change Accent Color',
+                      style: TextStyle(color: titleColor))),
+              ListTile(
+                  leading: Icon(
+                    Icons.g_translate,
+                    color: Colors.grey[500],
+                  ),
+                  title: Text('Help Translate',
+                      style: TextStyle(color: titleColor))),
+              ListTile(
+                  leading: Icon(
+                    Icons.supervisor_account,
+                    color: Colors.grey[500],
+                  ),
+                  title: Text('Support Development',
+                      style: TextStyle(color: titleColor))),
+              ListTile(
+                  leading: Icon(
+                    Icons.rate_review,
+                    color: Colors.grey[500],
+                  ),
+                  title: Text('Rate and Review',
+                      style: TextStyle(color: titleColor))),
+              ListTile(
+                  leading: Icon(
+                    Icons.info_outline,
+                    color: Colors.grey[500],
+                  ),
+                  title: Text('About', style: TextStyle(color: titleColor))),
             ],
           );
         });
@@ -185,7 +221,8 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
               ? IconButton(
                   icon: Icon(Icons.note_add),
                   onPressed: () {
-                    navigateToDetail(context, Note('', ''), 'Add Note');
+                    navigateToDetail(
+                        context, Note('', '', 'Not Specified'), 'Add Note');
                   },
                 )
               : ListView.builder(
@@ -198,8 +235,14 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
                                 context, notes[index], 'Edit Note');
                           },
                           //leading: Icon(Icons.album),
-                          title: Text(notes[index].title),
-                          subtitle: Text(notes[index].text),
+                          title: Text(
+                            notes[index].title,
+                            style: TextStyle(color: titleColor),
+                          ),
+                          subtitle: Text(
+                            notes[index].text,
+                            style: TextStyle(color: textColor),
+                          ),
                         ),
                       ),
                     );
@@ -207,7 +250,31 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
                   itemCount: notes.length,
                 ),
         ),
-        Tab(icon: Icon(Icons.star)),
+        Tab(
+          child: starredNotes.length == 0
+              ? Icon(
+                  Icons.star,
+                  color: Colors.yellow[800],
+                )
+              : ListView.builder(
+                  itemBuilder: (context, starIndex) {
+                    return Center(
+                      child: Card(
+                        child: ListTile(
+                          leading: Icon(Icons.star, color: Colors.yellow[800]),
+                          title: Text(
+                            starredNotes[starIndex].title,
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          subtitle: Text(starredNotes[starIndex].text,
+                              style: TextStyle(color: Colors.grey[500])),
+                        ),
+                      ),
+                    );
+                  },
+                  itemCount: starredNotes.length,
+                ),
+        ),
       ]),
       floatingActionButton: Padding(
         padding: const EdgeInsets.fromLTRB(15, 8.0, 15, 8.0),
@@ -221,7 +288,8 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
                 icon: Icon(Icons.add)),
             FloatingActionButton.extended(
                 onPressed: () {
-                  navigateToDetail(context, Note('', ''), 'Add Note');
+                  navigateToDetail(
+                      context, Note('', '', 'Not Specified'), 'Add Note');
                 },
                 label: Text('Note'),
                 icon: Icon(Icons.add))
@@ -243,6 +311,7 @@ class AddNote extends StatefulWidget {
 }
 
 class AddNoteState extends State<AddNote> {
+  List<String> category = ['Not Specified', 'Sooper Sanams'];
   DatabaseHelper helper = DatabaseHelper();
   String appBarTitle;
   Note note;
@@ -267,6 +336,41 @@ class AddNoteState extends State<AddNote> {
     } else {
       print(["calling insert "]);
       await helper.insertNote(note);
+    }
+  }
+
+  Future<void> showCategories() async {
+    switch (await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return SimpleDialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            title: Text(
+              'Select a Category',
+              style: TextStyle(color: Colors.redAccent),
+            ),
+            children: <Widget>[
+              ListView.builder(itemBuilder: (context, categoryListIndex) {
+                return SimpleDialogOption(
+                  child: ListTile(
+                    leading: Icon(Icons.bookmark),
+                    title: Text(category[categoryListIndex]),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context, category[categoryListIndex]);
+                  },
+                );
+              }),
+            ],
+          );
+        })) {
+      case 'Not Specified':
+        print('Option 1');
+        break;
+      case 'Cats':
+        print('Option 2');
+        break;
     }
   }
 
@@ -296,12 +400,14 @@ class AddNoteState extends State<AddNote> {
           },
         ),
         actions: <Widget>[
+          //TODO: Note info ie note statistics:- creation date, Category, word count, character count
           IconButton(icon: Icon(Icons.info), onPressed: null),
           IconButton(
               icon: Icon(Icons.check_circle),
               onPressed: () {
                 note.title = titleController.text;
                 note.text = textController.text;
+                //note.starred =
                 _save(context);
               }),
         ],
@@ -316,7 +422,7 @@ class AddNoteState extends State<AddNote> {
                 child: TextField(
                   controller: titleController,
                   maxLength: 25,
-                  style: TextStyle(fontSize: 25),
+                  style: TextStyle(fontSize: 25, color: titleColor),
                   onChanged: (value) {
                     note.title = titleController.text;
                   },
@@ -324,23 +430,23 @@ class AddNoteState extends State<AddNote> {
                     border: InputBorder.none,
                     counterStyle: TextStyle(fontSize: 5),
                     hintText: 'Title',
-                    hintStyle: TextStyle(fontSize: 25),
+                    hintStyle: TextStyle(fontSize: 25, color: textColor),
                   ),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                 child: TextField(
                   controller: textController,
                   maxLines: 20,
-                  style: TextStyle(fontSize: 20),
+                  style: TextStyle(fontSize: 20, color: textColor),
                   onChanged: (value) {
                     note.title = titleController.text;
                   },
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: 'Add a Note',
-                    hintStyle: TextStyle(fontSize: 20),
+                    hintStyle: TextStyle(fontSize: 20, color: textColor),
                   ),
                 ),
               )
@@ -372,26 +478,32 @@ class AddNoteState extends State<AddNote> {
                     ),
                     IconButton(
                       icon: Icon(Icons.star,
-                          color: iconState[1] == false
+                          color: note.starred == 0
                               ? Colors.grey[500]
-                              : Colors.yellowAccent),
+                              : Colors.yellow[800]),
                       onPressed: () {
                         setState(() {
-                          iconState[1] = !iconState[1];
+                          note.title = titleController.text;
+                          note.text = textController.text;
+                          note.starred == 0
+                              ? note.starred = 1
+                              : note.starred = 0;
+                          note.starred == 0
+                              ? iconState[1] = false
+                              : iconState[1] = true;
                         });
                       },
                     ),
                     IconButton(
-                      icon: Icon(Icons.category,
-                          color: iconState[2] == false
-                              ? Colors.grey[500]
-                              : Colors.blueAccent),
-                      onPressed: () {
-                        setState(() {
-                          iconState[2] = !iconState[2];
-                        });
-                      },
-                    ),
+                        icon: Icon(Icons.category,
+                            color: iconState[2] == false
+                                ? Colors.grey[500]
+                                : Colors.blueAccent),
+                        onPressed: () {
+                          setState(() {
+                            showCategories();
+                          });
+                        }),
                     IconButton(
                       icon: Icon(Icons.list,
                           color: iconState[3] == false
@@ -406,7 +518,7 @@ class AddNoteState extends State<AddNote> {
                     IconButton(
                       icon: Icon(
                         Icons.delete,
-                        color: Colors.red,
+                        color: Colors.redAccent,
                       ),
                       onPressed: () {
                         print("pressed delete");
@@ -425,38 +537,25 @@ class AddNoteState extends State<AddNote> {
 }
 
 class Note {
-  int _id;
-  String _title;
-  String _text;
+  int id;
+  int starred;
+  String title;
+  String text;
+  String category;
 
-  Note(this._title, this._text);
-  Note.withId(this._id, this._title, this._text);
-
-  int get id => _id;
-  String get title => _title;
-  String get text => _text;
-
-  set title(String newTitle) {
-    if (newTitle.length <= 255) {
-      this._title = newTitle;
-    }
-  }
-
-  set text(String newDescription) {
-    if (newDescription.length <= 255) {
-      this._text = newDescription;
-    }
-  }
+  Note(this.title, this.text, this.category, {this.starred = 0});
 
   // Convert a Note object into a Map object
   Map<String, dynamic> toMap() {
     var map = Map<String, dynamic>();
-    print(["in toMap id = ", id, ' _id = ', _id]);
+    print(["in toMap id = ", id]);
     if (id != null) {
-      map['id'] = _id;
+      map['id'] = id;
     }
-    map['title'] = _title;
-    map['text'] = _text;
+    map['starred'] = starred;
+    map['title'] = title;
+    map['text'] = text;
+    map['category'] = category;
 
     return map;
   }
@@ -465,8 +564,10 @@ class Note {
   Note.fromMapObject(Map<String, dynamic> map) {
     print(["in fromMap map['id'] = ", map['id']]);
 
-    this._id = map['id'];
-    this._title = map['title'];
-    this._text = map['text'];
+    this.id = map['id'];
+    this.starred = map['starred'];
+    this.title = map['title'];
+    this.text = map['text'];
+    this.category = map['category'];
   }
 }

@@ -10,8 +10,11 @@ class DatabaseHelper {
 
   String noteTable = 'note_table';
   String colId = 'id';
+  String colStarred = 'starred';
   String colTitle = 'title';
   String colText = 'text';
+  String colCategory = 'category';
+
   DatabaseHelper._createInstance(); // Named constructor to create instance of DatabaseHelper
 
   factory DatabaseHelper() {
@@ -42,7 +45,7 @@ class DatabaseHelper {
 
   void _createDb(Database db, int newVersion) async {
     await db.execute(
-        'CREATE TABLE $noteTable($colId INTEGER PRIMARY KEY AUTOINCREMENT, $colTitle TEXT, $colText TEXT)');
+        'CREATE TABLE $noteTable($colId INTEGER PRIMARY KEY AUTOINCREMENT, $colStarred INTEGER, $colCategory TEXT , $colTitle TEXT, $colText TEXT)');
   }
 
   // Fetch Operation: Get all note objects from database
