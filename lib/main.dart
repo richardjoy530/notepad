@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:notepad/pincode.dart';
 import 'package:notepad/note.dart';
 import 'package:notepad/helper.dart';
 import 'package:notepad/addnote.dart';
+import 'package:notepad/settings.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter/material.dart';
 
@@ -24,7 +27,7 @@ class MyApp extends StatelessWidget {
           cardTheme: CardTheme(color: Colors.grey[800]),
           fontFamily: 'SpaceMono',
         ),
-        home: MyTabbedHome());
+        home: PinCode());
   }
 }
 
@@ -91,6 +94,17 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
     });
   } //
 
+  void navigateToSettings(BuildContext context) async {
+    bool result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          return Settings();
+        },
+      ),
+    );
+  }
+
   void navigateToDetail(BuildContext context, Note note, String title) async {
     bool result = await Navigator.push(
       context,
@@ -136,6 +150,9 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
                 ),
               ),
               ListTile(
+                  onTap: () {
+                    navigateToSettings(context);
+                  },
                   leading: Icon(
                     Icons.settings,
                     color: Colors.grey[500],
