@@ -1,6 +1,6 @@
 # notepad
 
-A simple practice app
+A simple Notepad App
 
 ## Getting Started
 
