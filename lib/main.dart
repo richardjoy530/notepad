@@ -18,6 +18,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
         theme: ThemeData(
+          textSelectionColor: Colors.grey[900],
           primaryColor: Colors.grey[900],
           accentColor: Colors.redAccent,
           //iconTheme: IconThemeData(color: Colors.redAccent),
