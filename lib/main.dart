@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:shared_preferences/shared_preferences.dart';
+//import 'package:shared_preferences/shared_preferences.dart';
 import 'package:notepad/pincode.dart';
 import 'package:notepad/note.dart';
 import 'package:notepad/helper.dart';
@@ -95,7 +95,7 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
   } //
 
   void navigateToSettings(BuildContext context) async {
-    bool result = await Navigator.push(
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) {
