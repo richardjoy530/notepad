@@ -19,23 +19,18 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  bool pinEnable = false;
-  int pin = 0000;
+  bool pinEnable;
+  PinData pinData = PinData();
 
-  void pinData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() async {
-      pinEnable = (prefs.getBool('pinEnable') ?? false);
-      if (pinEnable == true) {
-        pin = (prefs.getInt('pin') ?? 000);
-      }
-    });
+  updatePinEnable() async {
+    pinEnable = await pinData.getPinEnable();
+    print(pinEnable);
   }
 
   @override
   void initState() {
     super.initState();
-    pinData();
+    updatePinEnable();
   }
 
   @override
@@ -55,7 +50,6 @@ class _MyAppState extends State<MyApp> {
         home: pinEnable == false ? MyTabbedHome() : PinCode());
   }
 }
-
 
 class MyTabbedHome extends StatefulWidget {
   @override
@@ -128,8 +122,6 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
     }
     return Colors.blueAccent;
   }
-
-
 
   void _handleTabSelection() {
     setState(() {});

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Note {
   int id;
@@ -43,4 +44,35 @@ class Category {
   Color color;
 
   Category(this.name, {this.color = Colors.blueAccent});
+}
+
+class PinData {
+  static SharedPreferences prefs;
+  static bool pinEnable;
+  static String pin;
+
+  PinData();
+
+  Future<bool> getPinEnable() async {
+    prefs = await SharedPreferences.getInstance();
+    pinEnable = (prefs.getBool('pinEnable') ?? false);
+    return pinEnable;
+  }
+
+  Future<String> getPin() async {
+    prefs = await SharedPreferences.getInstance();
+    pin = (prefs.getString('pin') ?? '0000');
+    print(['pin is', pin]);
+    return pin;
+  }
+
+  void setPinEnable(bool value) async {
+    prefs = await SharedPreferences.getInstance();
+    prefs.setBool('pinEnable', value);
+  }
+
+  void setPin(String value) async {
+    prefs = await SharedPreferences.getInstance();
+    prefs.setString('pin', value);
+  }
 }

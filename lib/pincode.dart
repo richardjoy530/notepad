@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:notepad/main.dart';
+import 'package:notepad/note.dart';
 
 class PinCode extends StatefulWidget {
   @override
@@ -8,6 +9,14 @@ class PinCode extends StatefulWidget {
 }
 
 class _PinCodeState extends State<PinCode> {
+  PinData pinData = PinData();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+
   void navigateToHome(BuildContext context) async {
     await Navigator.push(
       context,
@@ -24,44 +33,50 @@ class _PinCodeState extends State<PinCode> {
     return Scaffold(
       body: Center(
           child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text(
-            'Enter Your',
-            style: TextStyle(
-                fontSize: 25, color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-          Text(
-            'PIN',
-            style: TextStyle(
-                fontSize: 35, color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-          TextField(
-            onSubmitted: (value) {
-              navigateToHome(context);
-            },
-            maxLength: 5,
-            obscureText: true,
-            keyboardType: TextInputType.number,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-
-                fontSize: 25,
-                color: Colors.white,
-                fontWeight: FontWeight.bold),
-            decoration: InputDecoration(
-              hintStyle: TextStyle(
-                  fontSize: 20,
-                  color: Colors.grey[700],
-                  fontWeight: FontWeight.bold),
-              counterText: '',
-              //counterStyle: TextStyle(color: Colors.grey[900]),
-              hintText: '...',
-              border: InputBorder.none,
-            ),
-          )
-        ],
-      )),
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                'Enter Your',
+                style: TextStyle(
+                    fontSize: 25, color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                'PIN',
+                style: TextStyle(
+                    fontSize: 35, color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+              TextField(
+                onSubmitted: (value) {
+                  // ignore: unrelated_type_equality_checks
+                  print(['value on textfield', value]);
+                  pinData.getPin().then((pin) {
+                    print(['pin on textfield', pin]);
+                    if (pin == value) {
+                      navigateToHome(context);
+                    }
+                  });
+                },
+                maxLength: 5,
+                obscureText: true,
+                keyboardType: TextInputType.number,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontSize: 25,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold),
+                decoration: InputDecoration(
+                  hintStyle: TextStyle(
+                      fontSize: 20,
+                      color: Colors.grey[700],
+                      fontWeight: FontWeight.bold),
+                  counterText: '',
+                  //counterStyle: TextStyle(color: Colors.grey[900]),
+                  hintText: '...',
+                  border: InputBorder.none,
+                ),
+              )
+            ],
+          )),
     );
   }
 }
