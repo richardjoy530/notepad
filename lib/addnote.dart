@@ -42,39 +42,43 @@ class AddNoteState extends State<AddNote> {
     }
   }
 
-  Future<void> showCategories() async {
-    switch (await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return SimpleDialog(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            title: Text(
-              'Select a Category',
-              style: TextStyle(color: Colors.redAccent),
+  Future<void> showCategories(context, Note note) async {
+    var itemIndex;
+    var result = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          shape:
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          title: Text(
+            'Select a Category',
+            style: TextStyle(color: Colors.redAccent),
+          ),
+          children: <Widget>[
+            Column(
+              children: List.generate(
+                category.length,
+                    (index) {
+                  return SimpleDialogOption(
+                    child: ListTile(
+                      leading: Icon(Icons.label_outline),
+                      title: Text(category[index]),
+                    ),
+                    onPressed: () {
+                      itemIndex = index;
+                      note.category = category[index];
+                      Navigator.pop(context, category[index]);
+                    },
+                  );
+                },
+              ),
             ),
-            children: <Widget>[
-              ListView.builder(itemBuilder: (context, categoryListIndex) {
-                return SimpleDialogOption(
-                  child: ListTile(
-                    leading: Icon(Icons.bookmark),
-                    title: Text(category[categoryListIndex]),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context, category[categoryListIndex]);
-                  },
-                );
-              }),
-            ],
-          );
-        })) {
-      case 'Not Specified':
-        print('Option 1');
-        break;
-      case 'Cats':
-        print('Option 2');
-        break;
-    }
+          ],
+        );
+      },
+    );
+
+    print(category[itemIndex]);
   }
 
   void _delete(BuildContext context) async {
@@ -204,7 +208,7 @@ class AddNoteState extends State<AddNote> {
                                 : Colors.blueAccent),
                         onPressed: () {
                           setState(() {
-                            showCategories();
+                            showCategories(context, note);
                           });
                         }),
                     IconButton(

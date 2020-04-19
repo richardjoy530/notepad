@@ -43,6 +43,7 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
   TabController _tabController;
   TextEditingController controller = TextEditingController();
   List<Note> notes = [];
+  List<String> categoryList = ['Not Specified'];
   List<Note> starredNotes = [];
   List<String> menu = [
     'Settings',
@@ -234,7 +235,22 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
           ],
           bottom: TabBar(controller: _tabController, tabs: myTabs)),
       body: TabBarView(controller: _tabController, children: <Widget>[
-        Tab(icon: Icon(Icons.home)),
+        Tab(
+          child: ListView.builder(
+            itemCount: categoryList.length,
+            itemBuilder: (context, index) {
+              return Center(
+                child: Card(
+                  child: ListTile(
+                    leading: Icon(
+                      Icons.label_outline,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
         Tab(
           child: notes.length == 0
               ? IconButton(
