@@ -50,8 +50,18 @@ class PinData {
   static SharedPreferences prefs;
   static bool pinEnable;
   static String pin;
+  bool pinEnableTest;
 
-  PinData();
+
+  PinData() {
+    initialise();
+  }
+
+  initialise() async {
+    pinEnable = await getPinEnable();
+    pinEnableTest = await getPinEnable();
+    pin = await getPin();
+  }
 
   Future<bool> getPinEnable() async {
     prefs = await SharedPreferences.getInstance();

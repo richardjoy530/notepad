@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:notepad/main.dart';
 import 'package:notepad/note.dart';
 
 class PinCodeSet extends StatefulWidget {
@@ -20,7 +21,7 @@ class _PinCodeSetState extends State<PinCodeSet> {
           IconButton(
             icon: Icon(Icons.check),
             onPressed: () {
-              if (textController.text != null) {
+              if (textController.text != '') {
                 pinData.setPin(textController.text);
                 pinData.setPinEnable(true);
                 Navigator.pop(context, true);
@@ -56,7 +57,7 @@ class _PinCodeSetState extends State<PinCodeSet> {
               TextField(
                 controller: textController,
                 onSubmitted: (value) {
-                  if (textController.text != null) {
+                  if (textController.text != '') {
                     pinData.setPin(textController.text);
                     pinData.setPinEnable(true);
                     Navigator.pop(context, true);
