@@ -1,9 +1,13 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
 class Note {
   int id;
   int starred;
   String title;
   String text;
   String category;
+  Color categoryColor;
 
   Note(this.title, this.text, this.category, {this.starred = 0});
 
@@ -32,4 +36,11 @@ class Note {
     this.text = map['text'];
     this.category = map['category'];
   }
+}
+
+class Category {
+  String name;
+  Color color;
+
+  Category(this.name, {this.color = Colors.blueAccent});
 }

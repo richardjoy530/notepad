@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Color titleColor = Colors.white;
 Color textColor = Colors.grey[700];
@@ -9,6 +10,30 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
+  bool pinEnable;
+  String pin;
+
+  @override
+  void initState() {
+    super.initState();
+    loadPinData();
+  }
+
+  void setPinData(bool value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('pinEnable', value);
+  }
+
+  void loadPinData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() async {
+      pinEnable = (prefs.getBool('pinEnable') ?? false);
+      if (pinEnable == true) {
+        pin = (prefs.getInt('pin') ?? '000');
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,8 +77,12 @@ class _SettingsState extends State<Settings> {
                 'Request a Pin Code while opening the app. Enable/ Disable the checkbox on right.\nOnce PIN is setup, fingerprint protection option will be made available in the settings.',
                 style: TextStyle(color: textColor)),
             trailing: Checkbox(
-              value: false,
-              onChanged: null,
+              value: pinEnable,
+              onChanged: (value) {
+                setState(() {
+                  pinEnable = !pinEnable;
+                });
+              },
               checkColor: textColor,
             ),
           ),

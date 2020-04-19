@@ -14,7 +14,7 @@ class AddNote extends StatefulWidget {
 }
 
 class AddNoteState extends State<AddNote> {
-  List<String> category = ['Not Specified', 'Sooper Sanams'];
+  List<Category> category = [];
   DatabaseHelper helper = DatabaseHelper();
   String appBarTitle;
   Note note;
@@ -44,7 +44,7 @@ class AddNoteState extends State<AddNote> {
 
   Future<void> showCategories(context, Note note) async {
     var itemIndex;
-    var result = await showDialog(
+    await showDialog(
       context: context,
       builder: (BuildContext context) {
         return SimpleDialog(
@@ -62,12 +62,12 @@ class AddNoteState extends State<AddNote> {
                   return SimpleDialogOption(
                     child: ListTile(
                       leading: Icon(Icons.label_outline),
-                      title: Text(category[index]),
+                      title: Text(category[index].name),
                     ),
                     onPressed: () {
                       itemIndex = index;
-                      note.category = category[index];
-                      Navigator.pop(context, category[index]);
+                      note.category = category[index].name;
+                      Navigator.pop(context, category[index].name);
                     },
                   );
                 },

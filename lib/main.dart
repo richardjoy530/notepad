@@ -1,7 +1,7 @@
 import 'dart:async';
-//import 'package:shared_preferences/shared_preferences.dart';
 import 'package:notepad/pincode.dart';
 import 'package:notepad/note.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:notepad/helper.dart';
 import 'package:notepad/addnote.dart';
 import 'package:notepad/settings.dart';
@@ -13,7 +13,31 @@ Color textColor = Colors.grey[500];
 
 void main() => runApp(MyApp());
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool pinEnable = false;
+  int pin = 0000;
+
+  void pinData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() async {
+      pinEnable = (prefs.getBool('pinEnable') ?? false);
+      if (pinEnable == true) {
+        pin = (prefs.getInt('pin') ?? 000);
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    pinData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -28,9 +52,10 @@ class MyApp extends StatelessWidget {
           cardTheme: CardTheme(color: Colors.grey[800]),
           fontFamily: 'SpaceMono',
         ),
-        home: PinCode());
+        home: pinEnable == false ? MyTabbedHome() : PinCode());
   }
 }
+
 
 class MyTabbedHome extends StatefulWidget {
   @override
@@ -43,7 +68,15 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
   TabController _tabController;
   TextEditingController controller = TextEditingController();
   List<Note> notes = [];
-  List<String> categoryList = ['Not Specified'];
+  List<Category> categoryList = [
+    Category('Not Specified'),
+    Category('Not Specified'),
+    Category('Not Specified'),
+    Category('Not Specified'),
+  ];
+
+  List<String> categoryNameList = [];
+
   List<Note> starredNotes = [];
   List<String> menu = [
     'Settings',
@@ -60,6 +93,44 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
     Tab(icon: Icon(Icons.star_half))
   ];
 
+  void loadPrefsData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() async {
+      categoryNameList = (prefs.getStringList('categoryNameList'));
+      for (var name in categoryNameList) {
+        var color = await getCategoryColor(name);
+        categoryList.add(Category(name, color: color));
+      }
+    });
+  }
+
+  Future<MaterialAccentColor> getCategoryColor(String name) async {
+    var colorName;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      colorName = (prefs.getString(name));
+    });
+    switch (colorName) {
+      case 'red':
+        return Colors.redAccent;
+      case 'blue':
+        return Colors.blueAccent;
+      case 'yellow':
+        return Colors.yellowAccent;
+      case 'green':
+        return Colors.greenAccent;
+      case 'lightgreen':
+        return Colors.lightGreenAccent;
+      case 'purple':
+        return Colors.purpleAccent;
+      case 'pink':
+        return Colors.pinkAccent;
+    }
+    return Colors.blueAccent;
+  }
+
+
+
   void _handleTabSelection() {
     setState(() {});
   }
@@ -68,6 +139,7 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
   void initState() {
     super.initState();
     updateListView();
+    loadPrefsData();
     _tabController = TabController(vsync: this, length: myTabs.length);
     _tabController.addListener(_handleTabSelection);
   }
@@ -236,19 +308,29 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
           bottom: TabBar(controller: _tabController, tabs: myTabs)),
       body: TabBarView(controller: _tabController, children: <Widget>[
         Tab(
-          child: ListView.builder(
-            itemCount: categoryList.length,
-            itemBuilder: (context, index) {
-              return Center(
-                child: Card(
+          child: GridView.count(
+            childAspectRatio: 3,
+            crossAxisCount: 2,
+            children: List.generate(categoryList.length, (index) {
+              return Card(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+                color: Colors.black,
+                child: Center(
                   child: ListTile(
                     leading: Icon(
                       Icons.label_outline,
+                      color: categoryList[index].color,
+                    ),
+                    title: Text(
+                      categoryList[index].name,
+                      style: TextStyle(
+                          color: titleColor, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
               );
-            },
+            }),
           ),
         ),
         Tab(
