@@ -56,6 +56,8 @@ class PinData {
   Future<bool> getPinEnable() async {
     prefs = await SharedPreferences.getInstance();
     pinEnable = (prefs.getBool('pinEnable') ?? false);
+    print(['int the notes pinEnable is', pinEnable]);
+
     return pinEnable;
   }
 

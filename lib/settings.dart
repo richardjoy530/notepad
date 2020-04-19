@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:notepad/pincodeset.dart';
 import 'package:notepad/note.dart';
 
-
 Color titleColor = Colors.white;
 Color textColor = Colors.grey[700];
 
@@ -15,19 +14,22 @@ class _SettingsState extends State<Settings> {
   PinData pinData = PinData();
   static bool pinEnable;
 
+  int test = 1;
   @override
   void initState() {
-    updatePinEnable();
+    pinEnable = updatePinEnable();
     super.initState();
   }
 
-  updatePinEnable() {
-    setState(() {
-      pinData.getPinEnable().then((value) {
-        print(['in updatepinenable in settings pinenable = ', value]);
-        pinEnable = value;
-      });
+  bool updatePinEnable() {
+    var temp;
+    pinData.getPinEnable().then((value) {
+      //print(['in updatePinEnable in settings pinEnable = ', value]);
+      pinEnable = value;
+      temp = value;
     });
+
+    return temp;
   }
 
   void navigateToPinCodeSet(BuildContext context) async {
@@ -44,7 +46,7 @@ class _SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     if (pinEnable == null) {
-      updatePinEnable();
+      pinEnable = updatePinEnable();
     }
     return Scaffold(
       appBar: AppBar(
@@ -88,20 +90,20 @@ class _SettingsState extends State<Settings> {
                 'Request a Pin Code while opening the app. Enable/ Disable the checkbox on right.\nOnce PIN is setup, fingerprint protection option will be made available in the settings.',
                 style: TextStyle(color: textColor)),
             trailing: Checkbox(
-              value: pinEnable == true ? true : false,
+              tristate: true,
+              value: updatePinEnable() == true ? true : false,
               onChanged: (bool newValue) {
-                setState(() {
-                  print(pinEnable);
-                  if (newValue == true) {
-                    navigateToPinCodeSet(context);
-                    updatePinEnable();
-                  }
-                  else {
-                    pinData.setPinEnable(false);
-                    updatePinEnable();
-                    //pinEnable=false;
-                  }
-                });
+                if (newValue == true) {
+                  navigateToPinCodeSet(context);
+                  pinEnable = updatePinEnable();
+                } else {
+                  setState(() {
+                    pinData.setPinEnable(newValue);
+                    pinEnable = updatePinEnable();
+
+                    //print(['test value ',newValue]);
+                  });
+                }
               },
               checkColor: textColor,
             ),

@@ -42,26 +42,34 @@ class _PinCodeSetState extends State<PinCodeSet> {
               Text(
                 'Enter Your',
                 style: TextStyle(
-                    fontSize: 25, color: Colors.white, fontWeight: FontWeight.bold),
+                    fontSize: 25,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold),
               ),
               Text(
                 'PIN',
                 style: TextStyle(
-                    fontSize: 35, color: Colors.white, fontWeight: FontWeight.bold),
+                    fontSize: 35,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold),
               ),
               TextField(
                 controller: textController,
                 onSubmitted: (value) {
-                  pinData.setPin(value);
-                  pinData.setPinEnable(true);
-                  Navigator.pop(context);
+                  if (textController.text != null) {
+                    pinData.setPin(textController.text);
+                    pinData.setPinEnable(true);
+                    Navigator.pop(context, true);
+                  }
                 },
                 maxLength: 5,
                 obscureText: true,
                 keyboardType: TextInputType.number,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    fontSize: 25, color: Colors.white, fontWeight: FontWeight.bold),
+                    fontSize: 25,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold),
                 decoration: InputDecoration(
                   hintStyle: TextStyle(
                       fontSize: 20,
