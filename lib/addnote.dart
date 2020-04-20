@@ -145,7 +145,7 @@ class AddNoteState extends State<AddNote> {
                 padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                 child: TextField(
                   controller: textController,
-                  maxLines: 20,
+                  maxLines: 10,
                   style: TextStyle(fontSize: 20, color: textColor),
                   onChanged: (value) {
                     note.title = titleController.text;

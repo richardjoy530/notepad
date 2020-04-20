@@ -48,10 +48,8 @@ class Category {
 
 class PinData {
   static SharedPreferences prefs;
-  static bool pinEnable;
+  static int pinEnable;
   static String pin;
-  bool pinEnableTest;
-
 
   PinData() {
     initialise();
@@ -59,28 +57,24 @@ class PinData {
 
   initialise() async {
     pinEnable = await getPinEnable();
-    pinEnableTest = await getPinEnable();
     pin = await getPin();
   }
 
-  Future<bool> getPinEnable() async {
+  Future<int> getPinEnable() async {
     prefs = await SharedPreferences.getInstance();
-    pinEnable = (prefs.getBool('pinEnable') ?? false);
-    print(['int the notes pinEnable is', pinEnable]);
-
-    return pinEnable;
+    return pinEnable = (prefs.getInt('pinEnable') ?? 0);
   }
 
   Future<String> getPin() async {
     prefs = await SharedPreferences.getInstance();
-    pin = (prefs.getString('pin') ?? '0000');
+    pin = (prefs.getString('pin') ?? '');
     print(['pin is', pin]);
     return pin;
   }
 
-  void setPinEnable(bool value) async {
+  void setPinEnable(int value) async {
     prefs = await SharedPreferences.getInstance();
-    prefs.setBool('pinEnable', value);
+    prefs.setInt('pinEnable', value);
   }
 
   void setPin(String value) async {

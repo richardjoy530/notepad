@@ -1,12 +1,14 @@
 import 'dart:async';
-import 'package:notepad/pincode.dart';
-import 'package:notepad/note.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:notepad/helper.dart';
-import 'package:notepad/addnote.dart';
-import 'package:notepad/settings.dart';
-import 'package:sqflite/sqflite.dart';
+
 import 'package:flutter/material.dart';
+import 'package:notepad/addnote.dart';
+import 'package:notepad/fingerprintscreen.dart';
+import 'package:notepad/helper.dart';
+import 'package:notepad/note.dart';
+import 'package:notepad/pincode.dart';
+import 'package:notepad/settings.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite/sqflite.dart';
 
 Color titleColor = Colors.white;
 Color textColor = Colors.grey[500];
@@ -14,41 +16,56 @@ Color textColor = Colors.grey[500];
 void main() => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
-
   @override
   _MyAppState createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  bool pinEnable;
+  Future<int> pinEnable;
   PinData pinData = PinData();
-
-  updatePinEnable() async {
-    pinEnable = await pinData.getPinEnable();
-    print(pinEnable);
-  }
-
   @override
   void initState() {
-    super.initState();
     updatePinEnable();
+    super.initState();
+  }
+
+  Future<void> updatePinEnable() async {
+    pinEnable = pinData.getPinEnable();
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        theme: ThemeData(
-          textSelectionColor: Colors.grey[900],
-          primaryColor: Colors.grey[900],
-          accentColor: Colors.redAccent,
-          //iconTheme: IconThemeData(color: Colors.redAccent),
-          primaryIconTheme: IconThemeData(color: Colors.grey[500]),
-          canvasColor: Colors.grey[900],
-          textTheme: TextTheme(title: TextStyle(color: Colors.white)),
-          cardTheme: CardTheme(color: Colors.grey[800]),
-          fontFamily: 'SpaceMono',
-        ),
-        home: pinEnable == false ? MyTabbedHome() : PinCode());
+      theme: ThemeData(
+        textSelectionColor: Colors.grey[900],
+        primaryColor: Colors.grey[900],
+        accentColor: Colors.redAccent,
+        //iconTheme: IconThemeData(color: Colors.redAccent),
+        primaryIconTheme: IconThemeData(color: Colors.grey[500]),
+        canvasColor: Colors.grey[900],
+        textTheme: TextTheme(title: TextStyle(color: Colors.white)),
+        cardTheme: CardTheme(color: Colors.grey[800]),
+        fontFamily: 'SpaceMono',
+      ),
+      home: FutureBuilder<int>(
+          future: pinEnable,
+          builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+            if (snapshot.hasData) {
+              if (snapshot.data != null) {
+                return snapshot.data == 0
+                    ? MyTabbedHome()
+                    : snapshot.data == 1 ? PinCode : FingerPrintListener();
+              } else {
+                throw Exception(); //you should handle this case if your function returns null
+              }
+            } else {
+              print('circling');
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+          }),
+    );
   }
 }
 
@@ -59,8 +76,11 @@ class MyTabbedHome extends StatefulWidget {
 
 class _MyTabbedHomeState extends State<MyTabbedHome>
     with SingleTickerProviderStateMixin {
+  int textLimiter;
   DatabaseHelper databaseHelper = DatabaseHelper();
   TabController _tabController;
+  int pinEnable;
+  PinData pinData = PinData();
   TextEditingController controller = TextEditingController();
   List<Note> notes = [];
   List<Category> categoryList = [
@@ -88,7 +108,7 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
     Tab(icon: Icon(Icons.star_half))
   ];
 
-  void loadPrefsData() async {
+  void loadCategoryData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() async {
       categoryNameList = (prefs.getStringList('categoryNameList'));
@@ -97,6 +117,16 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
         categoryList.add(Category(name, color: color));
       }
     });
+  }
+
+  Future<void> getTextLimiter() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    textLimiter = (prefs.getInt('textlimiter') ?? 2);
+  }
+
+  Future<void> setTextLimiter(int value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setInt('textLimiter', value);
   }
 
   Future<MaterialAccentColor> getCategoryColor(String name) async {
@@ -128,20 +158,10 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
     setState(() {});
   }
 
-  @override
-  void initState() {
-    super.initState();
-    updateListView();
-    loadPrefsData();
-    _tabController = TabController(vsync: this, length: myTabs.length);
-    _tabController.addListener(_handleTabSelection);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    controller.dispose();
-    super.dispose();
+  Future<void> updatePinEnable() async {
+    pinData.getPinEnable().then((onValue) {
+      pinEnable = onValue;
+    });
   }
 
   void updateListView() {
@@ -162,14 +182,15 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
   } //
 
   void navigateToSettings(BuildContext context) async {
-    await Navigator.push(
+    textLimiter = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) {
-          return Settings();
+          return Settings(pinEnable, textLimiter);
         },
       ),
     );
+    setTextLimiter(textLimiter);
   }
 
   void navigateToDetail(BuildContext context, Note note, String title) async {
@@ -211,7 +232,7 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
                       leading: CircleAvatar(
                           backgroundImage: AssetImage('images/avatar.png')),
                       title:
-                          Text('Hello,', style: TextStyle(color: Colors.white)),
+                      Text('Hello,', style: TextStyle(color: Colors.white)),
                       subtitle: Text('Richard',
                           style: TextStyle(color: Colors.grey[500]))),
                 ),
@@ -272,6 +293,24 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
   }
 
   @override
+  void initState() {
+    super.initState();
+    getTextLimiter();
+    updatePinEnable();
+    updateListView();
+    loadCategoryData();
+    _tabController = TabController(vsync: this, length: myTabs.length);
+    _tabController.addListener(_handleTabSelection);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (notes == null) {
       notes = List<Note>();
@@ -296,94 +335,106 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
             Padding(
                 padding: const EdgeInsets.fromLTRB(16.0, 8, 16, 8),
                 child:
-                    IconButton(icon: Icon(Icons.cloud_queue), onPressed: () {}))
+                IconButton(icon: Icon(Icons.cloud_queue), onPressed: () {}))
           ],
           bottom: TabBar(controller: _tabController, tabs: myTabs)),
       body: TabBarView(controller: _tabController, children: <Widget>[
         Tab(
-          child: GridView.count(
-            childAspectRatio: 3,
-            crossAxisCount: 2,
-            children: List.generate(categoryList.length, (index) {
-              return Card(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                color: Colors.black,
-                child: Center(
-                  child: ListTile(
-                    leading: Icon(
-                      Icons.label_outline,
-                      color: categoryList[index].color,
-                    ),
-                    title: Text(
-                      categoryList[index].name,
-                      style: TextStyle(
-                          color: titleColor, fontWeight: FontWeight.bold),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              //childAspectRatio: 3,
+              children: List.generate(categoryList.length, (index) {
+                return Card(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                  color: Colors.grey[800],
+                  child: Center(
+                    child: ListTile(
+                      leading: Icon(
+                        Icons.label_outline,
+                        color: categoryList[index].color,
+                      ),
+                      title: Text(
+                        categoryList[index].name,
+                        maxLines: 2,
+                        style: TextStyle(
+                            color: titleColor, fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ),
-                ),
-              );
-            }),
+                );
+              }),
+            ),
           ),
         ),
         Tab(
           child: notes.length == 0
               ? IconButton(
-                  icon: Icon(Icons.note_add),
-                  onPressed: () {
-                    navigateToDetail(
-                        context, Note('', '', 'Not Specified'), 'Add Note');
-                  },
-                )
+            icon: Icon(Icons.note_add),
+            onPressed: () {
+              navigateToDetail(
+                  context, Note('', '', 'Not Specified'), 'Add Note');
+            },
+          )
               : ListView.builder(
-                  itemBuilder: (context, index) {
-                    return Center(
-                      child: Card(
-                        child: ListTile(
-                          onTap: () {
-                            navigateToDetail(
-                                context, notes[index], 'Edit Note');
-                          },
-                          //leading: Icon(Icons.album),
-                          title: Text(
-                            notes[index].title,
-                            style: TextStyle(color: titleColor),
-                          ),
-                          subtitle: Text(
-                            notes[index].text,
-                            style: TextStyle(color: textColor),
-                          ),
-                        ),
+            itemBuilder: (context, index) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                  child: Card(
+                    child: ListTile(
+                      onTap: () {
+                        navigateToDetail(
+                            context, notes[index], 'Edit Note');
+                      },
+                      //leading: Icon(Icons.album),
+                      title: Text(
+                        notes[index].title,
+                        style: TextStyle(color: titleColor),
                       ),
-                    );
-                  },
-                  itemCount: notes.length,
+                      subtitle: Text(
+                        notes[index].text,
+                        maxLines: textLimiter,
+                        style: TextStyle(color: textColor),
+                      ),
+                    ),
+                  ),
                 ),
+              );
+            },
+            itemCount: notes.length,
+          ),
         ),
         Tab(
           child: starredNotes.length == 0
               ? Icon(
-                  Icons.star,
-                  color: Colors.yellow[800],
-                )
+            Icons.star,
+            color: Colors.yellow[800],
+          )
               : ListView.builder(
-                  itemBuilder: (context, starIndex) {
-                    return Center(
-                      child: Card(
-                        child: ListTile(
-                          leading: Icon(Icons.star, color: Colors.yellow[800]),
-                          title: Text(
-                            starredNotes[starIndex].title,
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          subtitle: Text(starredNotes[starIndex].text,
-                              style: TextStyle(color: Colors.grey[500])),
-                        ),
+            itemBuilder: (context, starIndex) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                  child: Card(
+                    child: ListTile(
+                      leading:
+                      Icon(Icons.star, color: Colors.yellow[800]),
+                      title: Text(
+                        starredNotes[starIndex].title,
+                        style: TextStyle(color: Colors.white),
                       ),
-                    );
-                  },
-                  itemCount: starredNotes.length,
+                      subtitle: Text(starredNotes[starIndex].text,
+                          maxLines: textLimiter,
+                          style: TextStyle(color: Colors.grey[500])),
+                    ),
+                  ),
                 ),
+              );
+            },
+            itemCount: starredNotes.length,
+          ),
         ),
       ]),
       floatingActionButton: Padding(

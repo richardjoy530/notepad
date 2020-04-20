@@ -11,14 +11,8 @@ class PinCode extends StatefulWidget {
 class _PinCodeState extends State<PinCode> {
   PinData pinData = PinData();
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
-
   void navigateToHome(BuildContext context) async {
-    await Navigator.push(
+    Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) {
@@ -38,19 +32,30 @@ class _PinCodeState extends State<PinCode> {
               Text(
                 'Enter Your',
                 style: TextStyle(
-                    fontSize: 25, color: Colors.white, fontWeight: FontWeight.bold),
+                    fontSize: 25,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold),
               ),
               Text(
                 'PIN',
                 style: TextStyle(
-                    fontSize: 35, color: Colors.white, fontWeight: FontWeight.bold),
+                    fontSize: 35,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold),
               ),
               TextField(
+                onChanged: (value) {
+                  // ignore: unrelated_type_equality_checks
+                  pinData.getPin().then((pin) {
+                    print(['Pin on PinCode page is = ', pin]);
+                    if (pin == value || pin == '') {
+                      navigateToHome(context);
+                    }
+                  });
+                },
                 onSubmitted: (value) {
                   // ignore: unrelated_type_equality_checks
-                  print(['value on textfield', value]);
                   pinData.getPin().then((pin) {
-                    print(['pin on textfield', pin]);
                     if (pin == value) {
                       navigateToHome(context);
                     }
