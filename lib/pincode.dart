@@ -45,16 +45,13 @@ class _PinCodeState extends State<PinCode> {
               ),
               TextField(
                 onChanged: (value) {
-                  // ignore: unrelated_type_equality_checks
                   pinData.getPin().then((pin) {
-                    print(['Pin on PinCode page is = ', pin]);
                     if (pin == value || pin == '') {
                       navigateToHome(context);
                     }
                   });
                 },
                 onSubmitted: (value) {
-                  // ignore: unrelated_type_equality_checks
                   pinData.getPin().then((pin) {
                     if (pin == value) {
                       navigateToHome(context);
@@ -75,7 +72,6 @@ class _PinCodeState extends State<PinCode> {
                       color: Colors.grey[700],
                       fontWeight: FontWeight.bold),
                   counterText: '',
-                  //counterStyle: TextStyle(color: Colors.grey[900]),
                   hintText: '...',
                   border: InputBorder.none,
                 ),

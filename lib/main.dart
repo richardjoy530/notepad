@@ -54,12 +54,11 @@ class _MyAppState extends State<MyApp> {
               if (snapshot.data != null) {
                 return snapshot.data == 0
                     ? MyTabbedHome()
-                    : snapshot.data == 1 ? PinCode : FingerPrintListener();
+                    : snapshot.data == 1 ? PinCode() : FingerPrintListener();
               } else {
                 throw Exception(); //you should handle this case if your function returns null
               }
             } else {
-              print('circling');
               return Center(
                 child: CircularProgressIndicator(),
               );
@@ -165,7 +164,6 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
   }
 
   void updateListView() {
-    print("Updating");
     final Future<Database> dbFuture = databaseHelper.initializeDatabase();
     dbFuture.then((database) {
       Future<List<Note>> noteListFuture = databaseHelper.getNoteList();
@@ -327,7 +325,6 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
               icon: Icon(Icons.menu),
               onPressed: () {
                 setState(() {
-                  print('pressed');
                   _onMenuPressed(context);
                 });
               }),

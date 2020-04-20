@@ -112,7 +112,7 @@ class _SettingsState extends State<Settings> {
   }
 
   void navigateToPinCodeSet(BuildContext context) async {
-    Navigator.push(
+    bool result = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) {
@@ -120,12 +120,16 @@ class _SettingsState extends State<Settings> {
         },
       ),
     );
-    updatePinEnable();
+    if (result) {
+      updatePinEnable();
+    }
+    if (!result) {
+      updatePinEnable();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    print(['entered build', pinEnable]);
     return Scaffold(
       appBar: AppBar(
         title: Text('Settings'),
@@ -170,7 +174,6 @@ class _SettingsState extends State<Settings> {
                 'Request a Pin Code while opening the app. Enable/ Disable the checkbox on right.\nOnce PIN is setup, fingerprint protection option will be made available in the settings.',
                 style: TextStyle(color: textColor)),
             trailing: Checkbox(
-              //TODO: Fix null state error from the prefs
               value: pinEnable == 1 ? true : false,
               onChanged: (newValue) {
                 setState(() {

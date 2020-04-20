@@ -15,7 +15,6 @@ class Note {
   // Convert a Note object into a Map object
   Map<String, dynamic> toMap() {
     var map = Map<String, dynamic>();
-    print(["in toMap id = ", id]);
     if (id != null) {
       map['id'] = id;
     }
@@ -29,8 +28,6 @@ class Note {
 
   // Extract a Note object from a Map object
   Note.fromMapObject(Map<String, dynamic> map) {
-    print(["in fromMap map['id'] = ", map['id']]);
-
     this.id = map['id'];
     this.starred = map['starred'];
     this.title = map['title'];
@@ -62,19 +59,22 @@ class PinData {
 
   Future<int> getPinEnable() async {
     prefs = await SharedPreferences.getInstance();
-    return pinEnable = (prefs.getInt('pinEnable') ?? 0);
+    pinEnable = (prefs.getInt('pinEnable') ?? 0);
+    print(['PinEnable value ', pinEnable]);
+    return pinEnable;
   }
 
   Future<String> getPin() async {
     prefs = await SharedPreferences.getInstance();
     pin = (prefs.getString('pin') ?? '');
-    print(['pin is', pin]);
+    print(['Pin is', pin]);
     return pin;
   }
 
   void setPinEnable(int value) async {
     prefs = await SharedPreferences.getInstance();
     prefs.setInt('pinEnable', value);
+    print(['Setting PinEnable value ', value]);
   }
 
   void setPin(String value) async {

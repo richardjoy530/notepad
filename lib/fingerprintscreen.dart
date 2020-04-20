@@ -18,9 +18,7 @@ class _FingerPrintListenerState extends State<FingerPrintListener> {
       setState(() {});
       authenticated =
           await auth.authenticateWithBiometrics(localizedReason: null);
-      setState(() {
-        _isAuthenticating = false;
-      });
+      setState(() {});
     } on PlatformException catch (e) {
       print(e);
     }
@@ -34,13 +32,11 @@ class _FingerPrintListenerState extends State<FingerPrintListener> {
       builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
         if (snapshot.hasData) {
           if (snapshot.data != null) {
-            //snapshot.data is equal to the value returned from getPinEnable()
             return snapshot.data ? MyTabbedHome() : FingerPrintListener();
           } else {
             throw CircularProgressIndicator(); //you should handle this case if your function returns null
           }
         } else {
-          print('circling');
           return FingerPrint();
         }
       },
@@ -70,14 +66,22 @@ class _FingerPrintState extends State<FingerPrint> {
             style: TextStyle(
                 fontSize: 35, color: Colors.white, fontWeight: FontWeight.bold),
           ),
-          Text(
-            'Place your fingertip on the fingerprint sensor to verify your identity',
-            style: TextStyle(
-                fontSize: 15, color: Colors.white, fontWeight: FontWeight.bold),
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Text(
+              'Place your fingertip on the fingerprint sensor to verify your identity',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 15,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
           Icon(
             Icons.fingerprint,
-            size: 30,
+            size: 70,
+            color: Colors.blueGrey,
           )
         ],
       ),
