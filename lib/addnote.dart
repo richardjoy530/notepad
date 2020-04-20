@@ -1,8 +1,9 @@
 import 'dart:async';
-import 'package:notepad/note.dart';
-import 'package:notepad/main.dart';
-import 'package:notepad/helper.dart';
+
 import 'package:flutter/material.dart';
+import 'package:notepad/helper.dart';
+import 'package:notepad/main.dart';
+import 'package:notepad/note.dart';
 
 class AddNote extends StatefulWidget {
   final String appBarTitle;
@@ -34,10 +35,8 @@ class AddNoteState extends State<AddNote> {
   void _save(BuildContext context) async {
     Navigator.pop(context, true);
     if (note.id != null) {
-      print(["calling updatenote "]);
       await helper.updateNote(note);
     } else {
-      print(["calling insert "]);
       await helper.insertNote(note);
     }
   }
@@ -82,7 +81,6 @@ class AddNoteState extends State<AddNote> {
   }
 
   void _delete(BuildContext context) async {
-    print(['In _delete() ', note.id, note.title]);
     await helper.deleteNote(note.id);
     Navigator.pop(context, true);
     if (note.id == null) {
@@ -92,7 +90,6 @@ class AddNoteState extends State<AddNote> {
 
   @override
   Widget build(BuildContext context) {
-    print(["In build AddNote title = ", note.title, note.id]);
     titleController.text = note.title;
     textController.text = note.text;
     return Scaffold(
@@ -228,7 +225,6 @@ class AddNoteState extends State<AddNote> {
                         color: Colors.redAccent,
                       ),
                       onPressed: () {
-                        print("pressed delete");
                         _delete(context);
                       },
                     ),

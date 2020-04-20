@@ -1,8 +1,9 @@
-import 'dart:io';
 import 'dart:async';
+import 'dart:io';
+
 import 'package:notepad/note.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
   static DatabaseHelper _databaseHelper; // Singleton DatabaseHelper
@@ -76,10 +77,14 @@ class DatabaseHelper {
   // Delete Operation: Delete a Note object from database
   Future<int> deleteNote(int id) async {
     var db = await this.database;
-    print(['In delete function : Id = ', id]);
     int result =
         await db.rawDelete('DELETE FROM $noteTable WHERE $colId = $id');
     return result;
+  }
+
+  Future<int> deleteAllNote() async {
+    var db = await this.database;
+    return await db.rawDelete('DELETE * FROM $noteTable');
   }
 
   // Get number of Note objects in database

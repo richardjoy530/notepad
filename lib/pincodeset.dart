@@ -77,6 +77,11 @@ class _PinCodeSetState extends State<PinCodeSet> {
               ),
               TextField(
                 controller: oldPinController,
+                onChanged: (value) {
+                  if (oldPin == value) {
+                    pinChange = true;
+                  }
+                },
                 onSubmitted: (value) {
                   if (oldPin == value) {
                     pinChange = true;
@@ -117,7 +122,8 @@ class _PinCodeSetState extends State<PinCodeSet> {
               TextField(
                 controller: textController,
                 onSubmitted: (value) {
-                  if (textController.text != '' && pinChange == true) {
+                  if (textController.text != '' &&
+                      (pinChange == true || oldPin == '')) {
                     pinData.setPin(textController.text);
                     pinData.setPinEnable(1);
                     Navigator.pop(context, true);

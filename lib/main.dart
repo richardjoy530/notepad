@@ -345,7 +345,7 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
                 return Card(
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
-                  color: Colors.grey[800],
+                  color: Color.fromRGBO(20, 20, 20, 0.5),
                   child: Center(
                     child: ListTile(
                       leading: Icon(
@@ -380,6 +380,7 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
                   child: Card(
+                    color: Color.fromRGBO(20, 20, 20, 0.5),
                     child: ListTile(
                       onTap: () {
                         navigateToDetail(
@@ -415,7 +416,12 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
                   child: Card(
+                    color: Color.fromRGBO(20, 20, 20, 0.5),
                     child: ListTile(
+                      onTap: () {
+                        navigateToDetail(
+                            context, notes[starIndex], 'Edit Note');
+                      },
                       leading:
                       Icon(Icons.star, color: Colors.yellow[800]),
                       title: Text(

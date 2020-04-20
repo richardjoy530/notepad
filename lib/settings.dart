@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:notepad/helper.dart';
 import 'package:notepad/note.dart';
 import 'package:notepad/pincodeset.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Color titleColor = Colors.white;
 Color textColor = Colors.grey[700];
@@ -16,6 +18,7 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
+  DatabaseHelper databaseHelper = DatabaseHelper();
   int textLimiter;
   PinData pinData = PinData();
   static int pinEnable;
@@ -207,6 +210,7 @@ class _SettingsState extends State<Settings> {
                 setState(() {
                   if (newValue) {
                     pinData.setPinEnable(2);
+                    pinData.setPin('');
                   } else {
                     pinData.setPinEnable(0);
                   }
@@ -240,9 +244,15 @@ class _SettingsState extends State<Settings> {
             ),
           ),
           ListTile(
-            title: Text('Export notes', style: TextStyle(color: titleColor)),
-            subtitle: Text('Export notes to device storage',
+            title: Text('Reset App', style: TextStyle(color: titleColor)),
+            subtitle: Text(
+                'Erase all the user data including Notes, Categories and PIN',
                 style: TextStyle(color: textColor)),
+            onTap: () {
+              setState(() {
+                reset();
+              });
+            },
           ),
           Padding(
             padding: const EdgeInsets.all(13),
@@ -260,5 +270,17 @@ class _SettingsState extends State<Settings> {
         ],
       ),
     );
+  }
+
+  Future<void> reset() async {
+    setState(() {
+      pinData.setPinEnable(0);
+      pinData.setPin('');
+      databaseHelper.deleteAllNote();
+      updatePinEnable();
+    });
+
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    await preferences.clear();
   }
 }

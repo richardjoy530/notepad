@@ -46,7 +46,7 @@ class _PinCodeState extends State<PinCode> {
               TextField(
                 onChanged: (value) {
                   pinData.getPin().then((pin) {
-                    if (pin == value || pin == '') {
+                    if (pin == value) {
                       navigateToHome(context);
                     }
                   });
