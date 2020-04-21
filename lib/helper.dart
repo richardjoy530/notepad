@@ -61,8 +61,8 @@ class DatabaseHelper {
   // Insert Operation: Insert a Note object to database
   Future<int> insertNote(Note note) async {
     Database db = await this.database;
-    print(['In insert function : Id = ', note.id]);
     var result = await db.insert(noteTable, note.toMap());
+    print(['In insert function : Id = ', note.id]);
     return result;
   }
 
@@ -105,7 +105,13 @@ class DatabaseHelper {
     List<Note> noteList = List<Note>();
     // For loop to create a 'Note List' from a 'Map List'
     for (int i = 0; i < count; i++) {
-      noteList.add(Note.fromMapObject(noteMapList[i]));
+      Note temp = Note('', '', Category('Not Specified'));
+      temp.id = noteMapList[i]['id'];
+      temp.starred = noteMapList[i]['starred'];
+      temp.title = noteMapList[i]['title'];
+      temp.text = noteMapList[i]['text'];
+      temp.category.name = noteMapList[i]['category'];
+      noteList.add(temp);
     }
 
     return noteList;

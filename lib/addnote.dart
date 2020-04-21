@@ -20,9 +20,7 @@ class AddNoteState extends State<AddNote> {
   DatabaseHelper helper = DatabaseHelper();
   String appBarTitle;
   Note note;
-
   AddNoteState(this.appBarTitle, this.note, this.category);
-
   List<bool> iconState = [false, false, false, false];
   TextEditingController titleController = TextEditingController();
   TextEditingController textController = TextEditingController();
@@ -35,12 +33,12 @@ class AddNoteState extends State<AddNote> {
   }
 
   void _save(BuildContext context) async {
-    Navigator.pop(context, true);
     if (note.id != null) {
       await helper.updateNote(note);
     } else {
       await helper.insertNote(note);
     }
+    Navigator.pop(context);
   }
 
   Future<void> showCategories(context, Note note) async {
@@ -49,26 +47,37 @@ class AddNoteState extends State<AddNote> {
       context: context,
       builder: (BuildContext context) {
         return SimpleDialog(
+          backgroundColor: Colors.grey[900],
           shape:
           RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           title: Text(
             'Select a Category',
-            style: TextStyle(color: Colors.redAccent),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
           children: <Widget>[
             Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
                 category.length,
                     (index) {
                   return SimpleDialogOption(
                     child: ListTile(
-                      leading: Icon(Icons.label_outline),
-                      title: Text(category[index].name),
+                      leading: Icon(
+                        Icons.label_outline,
+                        color: category[index].color,
+                      ),
+                      title: Text(category[index].name,
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold)),
                     ),
                     onPressed: () {
                       itemIndex = index;
-                      note.category = category[index].name;
-                      Navigator.pop(context, category[index].name);
+                      setState(() {
+                        note.category.name = category[index].name;
+                        note.category.color = category[index].color;
+                      });
+                      Navigator.pop(context);
                     },
                   );
                 },
@@ -78,8 +87,6 @@ class AddNoteState extends State<AddNote> {
         );
       },
     );
-
-    print(category[itemIndex]);
   }
 
   void _delete(BuildContext context) async {
@@ -113,7 +120,6 @@ class AddNoteState extends State<AddNote> {
               onPressed: () {
                 note.title = titleController.text;
                 note.text = textController.text;
-                //note.starred =
                 _save(context);
               }),
         ],
@@ -147,7 +153,7 @@ class AddNoteState extends State<AddNote> {
                   maxLines: 10,
                   style: TextStyle(fontSize: 20, color: textColor),
                   onChanged: (value) {
-                    note.title = titleController.text;
+                    note.text = textController.text;
                   },
                   decoration: InputDecoration(
                     border: InputBorder.none,
@@ -202,9 +208,8 @@ class AddNoteState extends State<AddNote> {
                     ),
                     IconButton(
                         icon: Icon(Icons.category,
-                            color: iconState[2] == false
-                                ? Colors.grey[500]
-                                : Colors.blueAccent),
+                            //TODO change color dynamically
+                            color: note.category.color),
                         onPressed: () {
                           setState(() {
                             showCategories(context, note);

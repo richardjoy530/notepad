@@ -9,7 +9,19 @@ class AddCategory extends StatefulWidget {
 class _AddCategoryState extends State<AddCategory> {
   Category newCategory = Category('');
   Color dividerColor = Colors.cyanAccent;
-  TextEditingController categoryTextController = TextEditingController();
+  TextEditingController categoryTextController;
+
+  @override
+  void initState() {
+    categoryTextController = TextEditingController();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    categoryTextController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,9 +68,8 @@ class _AddCategoryState extends State<AddCategory> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: TextField(
-                style: TextStyle(
-                  color: Colors.white,
-                ),
+                style:
+                TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                 controller: categoryTextController,
                 maxLength: 25,
                 decoration: InputDecoration(

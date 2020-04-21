@@ -11,11 +11,20 @@ class _PinCodeSetState extends State<PinCodeSet> {
   PinData pinData = PinData();
   String oldPin;
   bool pinChange = false;
-  TextEditingController textController = TextEditingController();
-  TextEditingController oldPinController = TextEditingController();
+  TextEditingController textController;
+  TextEditingController oldPinController;
+
+  @override
+  void dispose() {
+    textController.dispose();
+    oldPinController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
+    textController = TextEditingController();
+    oldPinController = TextEditingController();
     updatePinEnable();
     super.initState();
   }

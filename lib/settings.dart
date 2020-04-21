@@ -141,7 +141,10 @@ class _SettingsState extends State<Settings> {
           onPressed: () {
             textLimiter =
             textLimiter == null ? widget.textLimiter : textLimiter;
-            Navigator.pop(context, textLimiter);
+            Navigator.pop(
+              context,
+              textLimiter,
+            );
             Navigator.pop(context, textLimiter);
           },
         ),
@@ -282,5 +285,7 @@ class _SettingsState extends State<Settings> {
 
     SharedPreferences preferences = await SharedPreferences.getInstance();
     await preferences.clear();
+    Navigator.pop(context, 'reset');
+    Navigator.pop(context, 'reset');
   }
 }

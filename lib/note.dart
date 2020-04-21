@@ -7,7 +7,7 @@ class Note {
   int starred;
   String title;
   String text;
-  String category;
+  Category category;
 
   Note(this.title, this.text, this.category, {this.starred = 0});
 
@@ -20,18 +20,9 @@ class Note {
     map['starred'] = starred;
     map['title'] = title;
     map['text'] = text;
-    map['category'] = category;
+    map['category'] = category.name;
 
     return map;
-  }
-
-  // Extract a Note object from a Map object
-  Note.fromMapObject(Map<String, dynamic> map) {
-    this.id = map['id'];
-    this.starred = map['starred'];
-    this.title = map['title'];
-    this.text = map['text'];
-    this.category = map['category'];
   }
 }
 
