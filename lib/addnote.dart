@@ -8,10 +8,11 @@ import 'package:notepad/note.dart';
 class AddNote extends StatefulWidget {
   final String appBarTitle;
   final Note note;
+  final List<Category> category;
 
-  AddNote(this.note, this.appBarTitle);
+  AddNote(this.note, this.appBarTitle, this.category);
   @override
-  AddNoteState createState() => AddNoteState(appBarTitle, note);
+  AddNoteState createState() => AddNoteState(appBarTitle, note, category);
 }
 
 class AddNoteState extends State<AddNote> {
@@ -19,7 +20,8 @@ class AddNoteState extends State<AddNote> {
   DatabaseHelper helper = DatabaseHelper();
   String appBarTitle;
   Note note;
-  AddNoteState(this.appBarTitle, this.note);
+
+  AddNoteState(this.appBarTitle, this.note, this.category);
 
   List<bool> iconState = [false, false, false, false];
   TextEditingController titleController = TextEditingController();

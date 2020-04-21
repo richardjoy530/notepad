@@ -84,7 +84,7 @@ class DatabaseHelper {
 
   Future<int> deleteAllNote() async {
     var db = await this.database;
-    return await db.rawDelete('DELETE * FROM $noteTable');
+    return await db.rawDelete('DELETE FROM $noteTable');
   }
 
   // Get number of Note objects in database

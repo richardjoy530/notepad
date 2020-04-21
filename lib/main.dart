@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:notepad/addcategory.dart';
 import 'package:notepad/addnote.dart';
 import 'package:notepad/fingerprintscreen.dart';
 import 'package:notepad/helper.dart';
@@ -82,15 +83,9 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
   PinData pinData = PinData();
   TextEditingController controller = TextEditingController();
   List<Note> notes = [];
-  List<Category> categoryList = [
-    Category('Not Specified'),
-    Category('Not Specified'),
-    Category('Not Specified'),
-    Category('Not Specified'),
-  ];
-
+  List<Category> categoryList = [];
   List<String> categoryNameList = [];
-
+  Category newCategory;
   List<Note> starredNotes = [];
   List<String> menu = [
     'Settings',
@@ -109,13 +104,14 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
 
   void loadCategoryData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() async {
-      categoryNameList = (prefs.getStringList('categoryNameList'));
-      for (var name in categoryNameList) {
-        var color = await getCategoryColor(name);
+    categoryNameList =
+    (prefs.getStringList('categoryNameList') ?? ['Not Specified']);
+    for (var name in categoryNameList) {
+      var color = await getCategoryColor(name);
+      setState(() {
         categoryList.add(Category(name, color: color));
-      }
-    });
+      });
+    }
   }
 
   Future<void> getTextLimiter() async {
@@ -128,11 +124,11 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
     prefs.setInt('textLimiter', value);
   }
 
-  Future<MaterialAccentColor> getCategoryColor(String name) async {
+  Future<Color> getCategoryColor(String name) async {
     var colorName;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      colorName = (prefs.getString(name));
+      colorName = (prefs.getString(name) ?? 'blue');
     });
     switch (colorName) {
       case 'red':
@@ -149,6 +145,8 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
         return Colors.purpleAccent;
       case 'pink':
         return Colors.pinkAccent;
+      case 'cyan':
+        return Colors.cyanAccent;
     }
     return Colors.blueAccent;
   }
@@ -189,14 +187,36 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
       ),
     );
     setTextLimiter(textLimiter);
+    updateListView();
+    updatePinEnable();
+    loadCategoryData();
   }
 
-  void navigateToDetail(BuildContext context, Note note, String title) async {
+  void navigateToCategoryAdd(BuildContext context) async {
+    newCategory = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          return AddCategory();
+        },
+      ),
+    );
+    if (newCategory != null) {
+      categoryList.add(newCategory);
+      categoryNameList.add(newCategory.name);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setStringList('categoryNameList', categoryNameList);
+      addCategoryNameColor(newCategory.name, newCategory.color);
+      updateListView();
+    }
+  }
+
+  void navigateToAddNote(BuildContext context, Note note, String title) async {
     bool result = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) {
-          return AddNote(note, title);
+          return AddNote(note, title, categoryList);
         },
       ),
     );
@@ -370,7 +390,7 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
               ? IconButton(
             icon: Icon(Icons.note_add),
             onPressed: () {
-              navigateToDetail(
+              navigateToAddNote(
                   context, Note('', '', 'Not Specified'), 'Add Note');
             },
           )
@@ -383,7 +403,7 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
                     color: Color.fromRGBO(20, 20, 20, 0.5),
                     child: ListTile(
                       onTap: () {
-                        navigateToDetail(
+                        navigateToAddNote(
                             context, notes[index], 'Edit Note');
                       },
                       //leading: Icon(Icons.album),
@@ -419,7 +439,7 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
                     color: Color.fromRGBO(20, 20, 20, 0.5),
                     child: ListTile(
                       onTap: () {
-                        navigateToDetail(
+                        navigateToAddNote(
                             context, notes[starIndex], 'Edit Note');
                       },
                       leading:
@@ -447,12 +467,14 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
           children: <Widget>[
             FloatingActionButton.extended(
                 heroTag: 'hero1',
-                onPressed: () {},
+                onPressed: () {
+                  navigateToCategoryAdd(context);
+                },
                 label: Text('Category'),
                 icon: Icon(Icons.add)),
             FloatingActionButton.extended(
                 onPressed: () {
-                  navigateToDetail(
+                  navigateToAddNote(
                       context, Note('', '', 'Not Specified'), 'Add Note');
                 },
                 label: Text('Note'),
@@ -462,5 +484,39 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
+  }
+
+  Future<void> addCategoryNameColor(String name, Color color) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString(name, getStringColor(color));
+  }
+
+  String getStringColor(Color color) {
+    if (color == Colors.redAccent) {
+      return 'red';
+    }
+    if (color == Colors.blueAccent) {
+      return 'blue';
+    }
+    if (color == Colors.yellowAccent) {
+      return 'yellow';
+    }
+    if (color == Colors.greenAccent) {
+      return 'green';
+    }
+    if (color == Colors.lightGreenAccent) {
+      return 'lightgreen';
+    }
+    if (color == Colors.purpleAccent) {
+      return 'purple';
+    }
+    if (color == Colors.pinkAccent) {
+      return 'pink';
+    }
+    if (color == Colors.cyanAccent) {
+      return 'cyan';
+    } else {
+      return 'blue';
+    }
   }
 }

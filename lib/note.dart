@@ -8,7 +8,6 @@ class Note {
   String title;
   String text;
   String category;
-  Color categoryColor;
 
   Note(this.title, this.text, this.category, {this.starred = 0});
 
@@ -39,7 +38,6 @@ class Note {
 class Category {
   String name;
   Color color;
-
   Category(this.name, {this.color = Colors.blueAccent});
 }
 
