@@ -38,18 +38,17 @@ class AddNoteState extends State<AddNote> {
     } else {
       await helper.insertNote(note);
     }
-    Navigator.pop(context);
+    Navigator.pop(context, true);
   }
 
   Future<void> showCategories(context, Note note) async {
-    var itemIndex;
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         return SimpleDialog(
           backgroundColor: Colors.grey[900],
           shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           title: Text(
             'Select a Category',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
@@ -59,7 +58,7 @@ class AddNoteState extends State<AddNote> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
                 category.length,
-                    (index) {
+                (index) {
                   return SimpleDialogOption(
                     child: ListTile(
                       leading: Icon(
@@ -72,7 +71,6 @@ class AddNoteState extends State<AddNote> {
                               fontWeight: FontWeight.bold)),
                     ),
                     onPressed: () {
-                      itemIndex = index;
                       setState(() {
                         note.category.name = category[index].name;
                         note.category.color = category[index].color;
@@ -103,7 +101,10 @@ class AddNoteState extends State<AddNote> {
     textController.text = note.text;
     return Scaffold(
       appBar: AppBar(
-        title: Text(appBarTitle),
+        title: Text(
+          appBarTitle,
+          style: TextStyle(color: note.category.color),
+        ),
         leading: IconButton(
           icon: Icon(
             Icons.close,
@@ -113,8 +114,6 @@ class AddNoteState extends State<AddNote> {
           },
         ),
         actions: <Widget>[
-          //TODO: Note info ie note statistics:- creation date, Category, word count, character count
-          IconButton(icon: Icon(Icons.info), onPressed: null),
           IconButton(
               icon: Icon(Icons.check_circle),
               onPressed: () {
@@ -207,9 +206,7 @@ class AddNoteState extends State<AddNote> {
                       },
                     ),
                     IconButton(
-                        icon: Icon(Icons.category,
-                            //TODO change color dynamically
-                            color: note.category.color),
+                        icon: Icon(Icons.category, color: note.category.color),
                         onPressed: () {
                           setState(() {
                             showCategories(context, note);

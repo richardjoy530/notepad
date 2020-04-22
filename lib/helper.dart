@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:notepad/note.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
@@ -101,6 +103,7 @@ class DatabaseHelper {
     var noteMapList = await getNoteMapList(); // Get 'Map List' from database
     int count =
         noteMapList.length; // Count the number of map entries in db table
+    SharedPreferences prefs = await SharedPreferences.getInstance();
 
     List<Note> noteList = List<Note>();
     // For loop to create a 'Note List' from a 'Map List'
@@ -111,9 +114,34 @@ class DatabaseHelper {
       temp.title = noteMapList[i]['title'];
       temp.text = noteMapList[i]['text'];
       temp.category.name = noteMapList[i]['category'];
+      temp.category.color = getCategoryColor(temp.category.name, prefs);
       noteList.add(temp);
     }
 
     return noteList;
+  }
+
+  Color getCategoryColor(String name, SharedPreferences prefs) {
+    var colorName;
+    colorName = (prefs.getString(name) ?? 'blue');
+    switch (colorName) {
+      case 'red':
+        return Colors.redAccent;
+      case 'blue':
+        return Colors.blueAccent;
+      case 'yellow':
+        return Colors.yellowAccent;
+      case 'green':
+        return Colors.greenAccent;
+      case 'lightgreen':
+        return Colors.lightGreenAccent;
+      case 'purple':
+        return Colors.purpleAccent;
+      case 'pink':
+        return Colors.pinkAccent;
+      case 'cyan':
+        return Colors.cyanAccent;
+    }
+    return Colors.blueAccent;
   }
 }

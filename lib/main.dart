@@ -113,7 +113,7 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
   updateCategoryList() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     categoryNameList =
-    (prefs.getStringList('categoryNameList') ?? ['Not Specified']);
+        (prefs.getStringList('categoryNameList') ?? ['Not Specified']);
     for (var name in categoryNameList) {
       var color = await getCategoryColor(name);
       setState(() {
@@ -237,10 +237,11 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
                       borderRadius: BorderRadius.all(Radius.circular(50))),
                   child: ListTile(
                       leading: CircleAvatar(
+                          radius: 25,
                           backgroundImage: AssetImage('images/avatar.png')),
                       title:
-                      Text('Hello,', style: TextStyle(color: Colors.white)),
-                      subtitle: Text('Richard',
+                          Text('Hello,', style: TextStyle(color: Colors.white)),
+                      subtitle: Text('Humans',
                           style: TextStyle(color: Colors.grey[500]))),
                 ),
               ),
@@ -363,7 +364,7 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
   }
 
   navigateToAddNote(BuildContext context, Note note, String title) async {
-    var result = await Navigator.push(
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) {
@@ -371,6 +372,7 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
         },
       ),
     );
+
     updateListView();
   }
 
@@ -442,39 +444,39 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
                 children: <Widget>[
                   Expanded(
                       child: ListView.builder(
-                        itemBuilder: (context, index) {
-                          return Center(
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                              child: Card(
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10)),
-                                color: Color.fromRGBO(20, 20, 20, 0.5),
-                                child: Center(
-                                  child: ListTile(
-                                    onTap: () {
-                                      navigateToCategoryDisplay(
-                                          context, categoryList[index]);
-                                    },
-                                    leading: Icon(
-                                      Icons.label_outline,
-                                      color: categoryList[index].color,
-                                    ),
-                                    title: Text(
-                                      categoryList[index].name,
-                                      maxLines: 2,
-                                      style: TextStyle(
-                                          color: titleColor,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
+                    itemBuilder: (context, index) {
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                            color: Color.fromRGBO(20, 20, 20, 0.5),
+                            child: Center(
+                              child: ListTile(
+                                onTap: () {
+                                  navigateToCategoryDisplay(
+                                      context, categoryList[index]);
+                                },
+                                leading: Icon(
+                                  Icons.label_outline,
+                                  color: categoryList[index].color,
+                                ),
+                                title: Text(
+                                  categoryList[index].name,
+                                  maxLines: 2,
+                                  style: TextStyle(
+                                      color: titleColor,
+                                      fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ),
-                          );
-                        },
-                        itemCount: categoryList.length,
-                      ))
+                          ),
+                        ),
+                      );
+                    },
+                    itemCount: categoryList.length,
+                  ))
                 ],
               ),
             ),
@@ -482,17 +484,64 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
           Tab(
             child: notes.length == 0
                 ? IconButton(
-              icon: Icon(Icons.note_add),
-              onPressed: () {
-                navigateToAddNote(context,
-                    Note('', '', Category('Not Specified')), 'Add Note');
-              },
-            )
+                    icon: Icon(Icons.note_add),
+                    onPressed: () {
+                      navigateToAddNote(context,
+                          Note('', '', Category('Not Specified')), 'Add Note');
+                    },
+                  )
                 : Column(
-              children: <Widget>[
-                Expanded(
-                  child: ListView.builder(
-                    itemBuilder: (context, index) {
+                    children: <Widget>[
+                      Expanded(
+                        child: ListView.builder(
+                          itemBuilder: (context, index) {
+                            return Center(
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                                child: Card(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10)),
+                                  color: Color.fromRGBO(20, 20, 20, 0.5),
+                                  child: ListTile(
+                                    onTap: () {
+                                      print([
+                                        notes[index].title,
+                                        notes[index].category.name,
+                                        notes[index].category.color
+                                      ]);
+                                      navigateToAddNote(
+                                          context, notes[index], 'Edit Note');
+                                    },
+                                    //leading: Icon(Icons.album),
+                                    title: Text(
+                                      notes[index].title,
+                                      style: TextStyle(color: titleColor),
+                                    ),
+                                    subtitle: Text(
+                                      notes[index].text,
+                                      maxLines: textLimiter,
+                                      style: TextStyle(
+                                          color: notes[index].category.color),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                          itemCount: notes.length,
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+          Tab(
+            child: starredNotes.length == 0
+                ? Icon(
+                    Icons.star,
+                    color: Colors.yellow[800],
+                  )
+                : ListView.builder(
+                    itemBuilder: (context, starIndex) {
                       return Center(
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
@@ -503,66 +552,24 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
                             child: ListTile(
                               onTap: () {
                                 navigateToAddNote(
-                                    context, notes[index], 'Edit Note');
+                                    context, notes[starIndex], 'Edit Note');
                               },
-                              //leading: Icon(Icons.album),
+                              leading:
+                                  Icon(Icons.star, color: Colors.yellow[800]),
                               title: Text(
-                                notes[index].title,
-                                style: TextStyle(color: titleColor),
+                                starredNotes[starIndex].title,
+                                style: TextStyle(color: Colors.white),
                               ),
-                              subtitle: Text(
-                                notes[index].text,
-                                maxLines: textLimiter,
-                                style: TextStyle(
-                                    color: notes[index].category.color),
-                              ),
+                              subtitle: Text(starredNotes[starIndex].text,
+                                  maxLines: textLimiter,
+                                  style: TextStyle(color: Colors.grey[500])),
                             ),
                           ),
                         ),
                       );
                     },
-                    itemCount: notes.length,
+                    itemCount: starredNotes.length,
                   ),
-                ),
-              ],
-            ),
-          ),
-          Tab(
-            child: starredNotes.length == 0
-                ? Icon(
-              Icons.star,
-              color: Colors.yellow[800],
-            )
-                : ListView.builder(
-              itemBuilder: (context, starIndex) {
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                    child: Card(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                      color: Color.fromRGBO(20, 20, 20, 0.5),
-                      child: ListTile(
-                        onTap: () {
-                          navigateToAddNote(
-                              context, notes[starIndex], 'Edit Note');
-                        },
-                        leading:
-                        Icon(Icons.star, color: Colors.yellow[800]),
-                        title: Text(
-                          starredNotes[starIndex].title,
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        subtitle: Text(starredNotes[starIndex].text,
-                            maxLines: textLimiter,
-                            style: TextStyle(color: Colors.grey[500])),
-                      ),
-                    ),
-                  ),
-                );
-              },
-              itemCount: starredNotes.length,
-            ),
           ),
         ]),
       ),

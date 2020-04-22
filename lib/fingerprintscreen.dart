@@ -11,24 +11,31 @@ class FingerPrintListener extends StatefulWidget {
 
 class _FingerPrintListenerState extends State<FingerPrintListener> {
   final LocalAuthentication auth = LocalAuthentication();
+  Future<bool> authenticated;
 
   Future<bool> _authenticate() async {
-    bool authenticated = false;
+    bool result = false;
     try {
       setState(() {});
-      authenticated =
-          await auth.authenticateWithBiometrics(localizedReason: null);
+      result = await auth.authenticateWithBiometrics(
+          localizedReason: 'Verify Your identity');
       setState(() {});
     } on PlatformException catch (e) {
       print(e);
     }
-    return authenticated;
+    return result;
+  }
+
+  @override
+  void initState() {
+    authenticated = _authenticate();
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<bool>(
-      future: _authenticate(),
+      future: authenticated,
       builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
         if (snapshot.hasData) {
           if (snapshot.data != null) {
@@ -50,6 +57,21 @@ class FingerPrint extends StatefulWidget {
 }
 
 class _FingerPrintState extends State<FingerPrint> {
+//  Future<bool> authenticated;
+//  final LocalAuthentication auth = LocalAuthentication();
+//  Future<bool> _authenticate() async {
+//    bool result = false;
+//    try {
+//      setState(() {});
+//      result = await auth.authenticateWithBiometrics(
+//          localizedReason: 'Verify Your identity');
+//      setState(() {});
+//    } on PlatformException catch (e) {
+//      print(e);
+//    }
+//    return result;
+//  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,7 +104,12 @@ class _FingerPrintState extends State<FingerPrint> {
             Icons.fingerprint,
             size: 70,
             color: Colors.blueGrey,
-          )
+          ),
+//          RaisedButton(
+//              child: Text('Verify'),
+//              onPressed: () {
+//                _authenticate();
+//              })
         ],
       ),
     );

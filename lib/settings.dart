@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:notepad/helper.dart';
 import 'package:notepad/note.dart';
 import 'package:notepad/pincodeset.dart';
@@ -18,6 +20,9 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
+  final LocalAuthentication auth = LocalAuthentication();
+
+  bool _canCheckBiometrics;
   DatabaseHelper databaseHelper = DatabaseHelper();
   int textLimiter;
   PinData pinData = PinData();
@@ -25,8 +30,23 @@ class _SettingsState extends State<Settings> {
 
   @override
   void initState() {
+    _checkBiometrics();
     pinEnable = widget.pinEnable;
     super.initState();
+  }
+
+  Future<void> _checkBiometrics() async {
+    bool canCheckBiometrics;
+    try {
+      canCheckBiometrics = await auth.canCheckBiometrics;
+    } on PlatformException catch (e) {
+      print(e);
+    }
+    if (!mounted) return;
+
+    setState(() {
+      _canCheckBiometrics = canCheckBiometrics;
+    });
   }
 
   Future<void> updatePinEnable() async {
@@ -42,7 +62,7 @@ class _SettingsState extends State<Settings> {
         return SimpleDialog(
           backgroundColor: Colors.grey[900],
           shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           title: Text(
             'Text Limiter',
             style: TextStyle(color: Colors.redAccent),
@@ -59,7 +79,7 @@ class _SettingsState extends State<Settings> {
                 SimpleDialogOption(
                   child: ListTile(
                     title:
-                    Text('- One Line', style: TextStyle(color: textColor)),
+                        Text('- One Line', style: TextStyle(color: textColor)),
                   ),
                   onPressed: () {
                     this.textLimiter = 1;
@@ -69,7 +89,7 @@ class _SettingsState extends State<Settings> {
                 SimpleDialogOption(
                   child: ListTile(
                     title:
-                    Text('- Two Line', style: TextStyle(color: textColor)),
+                        Text('- Two Line', style: TextStyle(color: textColor)),
                   ),
                   onPressed: () {
                     this.textLimiter = 2;
@@ -89,7 +109,7 @@ class _SettingsState extends State<Settings> {
                 SimpleDialogOption(
                   child: ListTile(
                     title:
-                    Text('- Four Line', style: TextStyle(color: textColor)),
+                        Text('- Four Line', style: TextStyle(color: textColor)),
                   ),
                   onPressed: () {
                     this.textLimiter = 4;
@@ -99,7 +119,7 @@ class _SettingsState extends State<Settings> {
                 SimpleDialogOption(
                   child: ListTile(
                     title:
-                    Text('- Five Line', style: TextStyle(color: textColor)),
+                        Text('- Five Line', style: TextStyle(color: textColor)),
                   ),
                   onPressed: () {
                     this.textLimiter = 5;
@@ -140,7 +160,7 @@ class _SettingsState extends State<Settings> {
           icon: Icon(Icons.arrow_back_ios),
           onPressed: () {
             textLimiter =
-            textLimiter == null ? widget.textLimiter : textLimiter;
+                textLimiter == null ? widget.textLimiter : textLimiter;
             Navigator.pop(
               context,
               textLimiter,
@@ -202,7 +222,7 @@ class _SettingsState extends State<Settings> {
             ),
           ),
           ListTile(
-            title: Text('Fingerprint Authentication',
+            title: Text('Biometric Authentication',
                 style: TextStyle(color: titleColor)),
             subtitle: Text(
                 'Use finger print authentication aling with PIN-Code protection',
@@ -210,15 +230,17 @@ class _SettingsState extends State<Settings> {
             trailing: Checkbox(
               value: pinEnable == 2 ? true : false,
               onChanged: (newValue) {
-                setState(() {
-                  if (newValue) {
-                    pinData.setPinEnable(2);
-                    pinData.setPin('');
-                  } else {
-                    pinData.setPinEnable(0);
-                  }
-                  updatePinEnable();
-                });
+                if (_canCheckBiometrics) {
+                  setState(() {
+                    if (newValue) {
+                      pinData.setPinEnable(2);
+                      pinData.setPin('');
+                    } else {
+                      pinData.setPinEnable(0);
+                    }
+                    updatePinEnable();
+                  });
+                }
               },
               checkColor: textColor,
             ),
