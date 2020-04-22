@@ -237,10 +237,11 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
                       borderRadius: BorderRadius.all(Radius.circular(50))),
                   child: ListTile(
                       leading: CircleAvatar(
+                          radius: 25,
                           backgroundImage: AssetImage('images/avatar.png')),
                       title:
                       Text('Hello,', style: TextStyle(color: Colors.white)),
-                      subtitle: Text('Richard',
+                      subtitle: Text('Humans',
                           style: TextStyle(color: Colors.grey[500]))),
                 ),
               ),
@@ -371,6 +372,7 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
         },
       ),
     );
+
     updateListView();
   }
 
@@ -502,6 +504,11 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
                             color: Color.fromRGBO(20, 20, 20, 0.5),
                             child: ListTile(
                               onTap: () {
+                                print([
+                                  notes[index].title,
+                                  notes[index].category.name,
+                                  notes[index].category.color
+                                ]);
                                 navigateToAddNote(
                                     context, notes[index], 'Edit Note');
                               },

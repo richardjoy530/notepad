@@ -38,11 +38,10 @@ class AddNoteState extends State<AddNote> {
     } else {
       await helper.insertNote(note);
     }
-    Navigator.pop(context);
+    Navigator.pop(context, true);
   }
 
   Future<void> showCategories(context, Note note) async {
-    var itemIndex;
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -72,7 +71,6 @@ class AddNoteState extends State<AddNote> {
                               fontWeight: FontWeight.bold)),
                     ),
                     onPressed: () {
-                      itemIndex = index;
                       setState(() {
                         note.category.name = category[index].name;
                         note.category.color = category[index].color;
@@ -103,7 +101,10 @@ class AddNoteState extends State<AddNote> {
     textController.text = note.text;
     return Scaffold(
       appBar: AppBar(
-        title: Text(appBarTitle),
+        title: Text(
+          appBarTitle,
+          style: TextStyle(color: note.category.color),
+        ),
         leading: IconButton(
           icon: Icon(
             Icons.close,
