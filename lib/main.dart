@@ -317,7 +317,11 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
     } else {
       setState(() {
         categoryList = [Category('Not Specified')];
+        starredNotes = [];
         notes = [];
+        pinData.setPin('');
+        pinData.setPinEnable(0);
+        pinEnable = 0;
       });
     }
   }

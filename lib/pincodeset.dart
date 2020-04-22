@@ -3,13 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:notepad/note.dart';
 
 class PinCodeSet extends StatefulWidget {
+  final String oldPin;
+
+  const PinCodeSet({Key key, this.oldPin}) : super(key: key);
   @override
   _PinCodeSetState createState() => _PinCodeSetState();
 }
 
 class _PinCodeSetState extends State<PinCodeSet> {
   PinData pinData = PinData();
-  String oldPin;
   bool pinChange = false;
   TextEditingController textController;
   TextEditingController oldPinController;
@@ -25,14 +27,7 @@ class _PinCodeSetState extends State<PinCodeSet> {
   void initState() {
     textController = TextEditingController();
     oldPinController = TextEditingController();
-    updatePinEnable();
     super.initState();
-  }
-
-  Future<void> updatePinEnable() async {
-    pinData.getPin().then((onValue) {
-      oldPin = onValue;
-    });
   }
 
   @override
@@ -61,103 +56,105 @@ class _PinCodeSetState extends State<PinCodeSet> {
       ),
       body: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                'Verify Your',
-                style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold),
-              ),
-              Text(
-                'OLD PIN',
-                style: TextStyle(
-                    fontSize: 30,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold),
-              ),
-              Text(
-                'Leave it empty if it\'s your first PIN',
-                style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold),
-              ),
-              TextField(
-                controller: oldPinController,
-                onChanged: (value) {
-                  if (oldPin == value) {
-                    pinChange = true;
-                  }
-                },
-                onSubmitted: (value) {
-                  if (oldPin == value) {
-                    pinChange = true;
-                  }
-                },
-                maxLength: 4,
-                obscureText: true,
-                keyboardType: TextInputType.number,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontSize: 25,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold),
-                decoration: InputDecoration(
-                  hintStyle: TextStyle(
-                      fontSize: 20,
-                      color: Colors.grey[700],
-                      fontWeight: FontWeight.bold),
-                  counterText: '',
-                  hintText: '...',
-                  border: InputBorder.none,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          widget.oldPin == ''
+              ? Divider()
+              : Column(
+                  children: <Widget>[
+                    Text(
+                      'Verify Your',
+                      style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      'Old Pin',
+                      style: TextStyle(
+                          fontSize: 30,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    TextField(
+                      controller: oldPinController,
+                      onChanged: (value) {
+                        if (widget.oldPin == value) {
+                          pinChange = true;
+                        }
+                      },
+                      onSubmitted: (value) {
+                        if (widget.oldPin == value) {
+                          pinChange = true;
+                        }
+                      },
+                      maxLength: 4,
+                      obscureText: true,
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 25,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold),
+                      decoration: InputDecoration(
+                        hintStyle: TextStyle(
+                            fontSize: 20,
+                            color: Colors.grey[700],
+                            fontWeight: FontWeight.bold),
+                        counterText: '',
+                        hintText: '...',
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              Text(
-                'Enter Your',
-                style: TextStyle(
-                    fontSize: 25,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold),
-              ),
-              Text(
-                'NEW PIN',
-                style: TextStyle(
-                    fontSize: 35,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold),
-              ),
-              TextField(
-                controller: textController,
-                onSubmitted: (value) {
-                  if (textController.text != '' &&
-                      (pinChange == true || oldPin == '')) {
-                    pinData.setPin(textController.text);
-                    pinData.setPinEnable(1);
-                    Navigator.pop(context, true);
-                  }
-                },
-                maxLength: 5,
-                obscureText: true,
-                keyboardType: TextInputType.number,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontSize: 25,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold),
-                decoration: InputDecoration(
-                  hintStyle: TextStyle(
-                      fontSize: 20,
-                      color: Colors.grey[700],
-                      fontWeight: FontWeight.bold),
-                  counterText: '',
-                  hintText: '...',
-                  border: InputBorder.none,
-                ),
-              )
-            ],
-          )),
+          Text(
+            'Enter Your',
+            style: TextStyle(
+                fontSize: 25, color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          Text(
+            'New Pin',
+            style: TextStyle(
+                fontSize: 35, color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          TextField(
+            controller: textController,
+            onChanged: (value) {
+              if (textController.text != '' &&
+                  textController.text.length == 4 &&
+                  (pinChange == true || widget.oldPin == '')) {
+                pinData.setPin(textController.text);
+                pinData.setPinEnable(1);
+                Navigator.pop(context, true);
+              }
+            },
+            onSubmitted: (value) {
+              if (textController.text != '' &&
+                  (pinChange == true || widget.oldPin == '')) {
+                pinData.setPin(textController.text);
+                pinData.setPinEnable(1);
+                Navigator.pop(context, true);
+              }
+            },
+            maxLength: 5,
+            obscureText: true,
+            keyboardType: TextInputType.number,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                fontSize: 25, color: Colors.white, fontWeight: FontWeight.bold),
+            decoration: InputDecoration(
+              hintStyle: TextStyle(
+                  fontSize: 20,
+                  color: Colors.grey[700],
+                  fontWeight: FontWeight.bold),
+              counterText: '',
+              hintText: '...',
+              border: InputBorder.none,
+            ),
+          )
+        ],
+      )),
     );
   }
 }

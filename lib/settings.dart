@@ -25,14 +25,20 @@ class _SettingsState extends State<Settings> {
   bool _canCheckBiometrics;
   DatabaseHelper databaseHelper = DatabaseHelper();
   int textLimiter;
+  String pin;
   PinData pinData = PinData();
   static int pinEnable;
 
   @override
   void initState() {
+    getPin();
     _checkBiometrics();
     pinEnable = widget.pinEnable;
     super.initState();
+  }
+
+  getPin() async {
+    pin = await pinData.getPin();
   }
 
   Future<void> _checkBiometrics() async {
@@ -135,20 +141,18 @@ class _SettingsState extends State<Settings> {
   }
 
   void navigateToPinCodeSet(BuildContext context) async {
-    bool result = await Navigator.push(
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) {
-          return PinCodeSet();
+          return PinCodeSet(
+            oldPin: pin,
+          );
         },
       ),
     );
-    if (result) {
-      updatePinEnable();
-    }
-    if (!result) {
-      updatePinEnable();
-    }
+    getPin();
+    updatePinEnable();
   }
 
   @override
@@ -234,7 +238,6 @@ class _SettingsState extends State<Settings> {
                   setState(() {
                     if (newValue) {
                       pinData.setPinEnable(2);
-                      pinData.setPin('');
                     } else {
                       pinData.setPinEnable(0);
                     }
