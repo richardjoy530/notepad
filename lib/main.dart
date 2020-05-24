@@ -45,7 +45,7 @@ class _MyAppState extends State<MyApp> {
         //iconTheme: IconThemeData(color: Colors.redAccent),
         primaryIconTheme: IconThemeData(color: Colors.grey[500]),
         canvasColor: Colors.grey[900],
-        textTheme: TextTheme(title: TextStyle(color: Colors.white)),
+        //textTheme: TextTheme(title: TextStyle(color: Colors.white)),
         cardTheme: CardTheme(color: Colors.grey[800]),
         fontFamily: 'SpaceMono',
       ),
@@ -552,9 +552,9 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
                             child: ListTile(
                               onTap: () {
                                 print([
-                                  notes[index].title,
-                                  notes[index].category.name,
-                                  notes[index].category.color
+                                  notes[starIndex].title,
+                                  notes[starIndex].category.name,
+                                  notes[starIndex].category.color
                                 ]);
                                 navigateToAddNote(
                                     context, notes[starIndex], 'Edit Note');
