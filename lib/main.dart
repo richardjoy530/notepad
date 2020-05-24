@@ -403,7 +403,7 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
     return Scaffold(
       body: NestedScrollView(
         controller: _scrollController,
-        headerSliverBuilder: (BuildContext context, bool isBoxScrolled) {
+        headerSliverBuilder: (context, bool isBoxScrolled) {
           return <Widget>[
             SliverAppBar(
                 pinned: true,
