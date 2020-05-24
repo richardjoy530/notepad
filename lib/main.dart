@@ -240,7 +240,7 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
                           radius: 25,
                           backgroundImage: AssetImage('images/avatar.png')),
                       title:
-                          Text('Hello,', style: TextStyle(color: Colors.white)),
+                      Text('Hello,', style: TextStyle(color: Colors.white)),
                       subtitle: Text('Humans',
                           style: TextStyle(color: Colors.grey[500]))),
                 ),
@@ -551,6 +551,11 @@ class _MyTabbedHomeState extends State<MyTabbedHome>
                             color: Color.fromRGBO(20, 20, 20, 0.5),
                             child: ListTile(
                               onTap: () {
+                                print([
+                                  notes[index].title,
+                                  notes[index].category.name,
+                                  notes[index].category.color
+                                ]);
                                 navigateToAddNote(
                                     context, notes[starIndex], 'Edit Note');
                               },
